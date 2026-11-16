@@ -47,7 +47,7 @@ button{font:inherit;color:inherit}
 .app{display:grid;grid-template-columns:310px minmax(0,1fr);min-height:100%}
 
 /* ---------- sommaire ---------- */
-.side{background:var(--surface);border-right:1px solid var(--line);position:sticky;top:0;align-self:start;height:100vh;height:100dvh;overflow-y:auto;
+.side{background:var(--surface);border-right:1px solid var(--line);position:sticky;top:0;align-self:start;height:100vh;height:100dvh;overflow-y:auto;overscroll-behavior:contain;
   padding-block:20px 28px;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:18px}
 .brand{font-family:var(--f-hand);font-weight:700;font-size:1.9rem;line-height:1.05;color:var(--rouge);margin:0 0 2px}
 .brand-sub{margin:0 0 14px;color:var(--muted);font-size:.92rem}
@@ -157,7 +157,9 @@ th{background:var(--pen-bg);font-weight:700}
   body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
   .topbar .brand{font-size:1.45rem;margin:0}
   .topbar .mini{font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums;margin:0}
-  .side{position:fixed;inset:0 auto 0 0;width:min(88vw,330px);z-index:40;transform:translateX(-102%);transition:transform .22s;height:auto;
+  .side{position:fixed;inset:0 auto 0 0;width:min(88vw,330px);z-index:40;transform:translateX(-102%);transition:transform .22s;
+    /* align-self:start (utile sur ordinateur) empêchait le panneau de prendre la hauteur de l'écran : il ne défilait plus */
+    align-self:auto;height:100%;height:100dvh;max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
     padding-top:calc(18px + env(safe-area-inset-top,0px));padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
   .side.open{transform:none;box-shadow:0 0 40px rgba(0,0,0,.35)}
   .scrim{display:block;position:fixed;inset:0;z-index:30;background:rgba(10,16,30,.45)}
