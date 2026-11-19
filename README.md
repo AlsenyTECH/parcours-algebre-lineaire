@@ -23,3 +23,7 @@ Télécharger le dépôt (ou le zip), puis ouvrir `index.html` dans un navigateu
 
 - MathJax 3.2.2 : licence Apache 2.0 (`assets/mathjax/LICENSE`)
 - Polices Caveat, Kalam et Source Sans 3 : SIL Open Font License 1.1 (`assets/fonts/LICENSE-*.txt`)
+
+## Parcours Suites et fonctions (chapitre II)
+
+Page `suites-fonctions.html` : 19 étapes, exercices corrigés, 8 vidéos commentées, deux évaluations chronométrées.
