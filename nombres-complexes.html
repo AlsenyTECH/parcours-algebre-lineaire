@@ -1,0 +1,1170 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Parcours Nombres complexes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Polices et MathJax sont dans assets/ : le site fonctionne sans connexion. */
+@font-face{font-family:'Caveat';font-style:normal;font-weight:500;font-display:swap;src:url(assets/fonts/caveat-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Caveat';font-style:normal;font-weight:700;font-display:swap;src:url(assets/fonts/caveat-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Kalam';font-style:normal;font-weight:400;font-display:swap;src:url(assets/fonts/kalam-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Kalam';font-style:normal;font-weight:700;font-display:swap;src:url(assets/fonts/kalam-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Source Sans 3';font-style:normal;font-weight:400;font-display:swap;src:url(assets/fonts/source-sans-3-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Source Sans 3';font-style:normal;font-weight:600;font-display:swap;src:url(assets/fonts/source-sans-3-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Source Sans 3';font-style:normal;font-weight:700;font-display:swap;src:url(assets/fonts/source-sans-3-latin-700-normal.woff2) format('woff2')}
+/* Mise en page : un cahier de cours. Sommaire à gauche (les étapes dans l'ordre), une étape à la fois à droite.
+   Clair = page de cahier quadrillée (encre bleue, titres rouges, stylo vert du prof). Sombre = tableau noir et craies. */
+:root{
+  --paper:#f7f9fc; --surface:#ffffff; --ink:#1b2440; --muted:#586381; --line:#d6ddec; --grid:#e3e9f5;
+  --pen:#1c3bb0; --pen-bg:#eef2fd; --rouge:#bd1f2b; --rouge-bg:#fdf2f2; --prof:#0a7441; --prof-bg:#e9f5ee;
+  --btn-fg:#ffffff;
+  --f-body:'Source Sans 3',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-hand:'Caveat','Segoe Print','Bradley Hand',cursive;
+  --f-prof:'Kalam','Comic Sans MS','Segoe Print',cursive;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#141d1a; --surface:#1b2723; --ink:#eef2ea; --muted:#a6b5ab; --line:#33453d; --grid:#22302b;
+    --pen:#a9c4ff; --pen-bg:#202d45; --rouge:#ff9d92; --rouge-bg:#372422; --prof:#8fe0ae; --prof-bg:#1e3329;
+    --btn-fg:#10201a; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#141d1a; --surface:#1b2723; --ink:#eef2ea; --muted:#a6b5ab; --line:#33453d; --grid:#22302b;
+  --pen:#a9c4ff; --pen-bg:#202d45; --rouge:#ff9d92; --rouge-bg:#372422; --prof:#8fe0ae; --prof-bg:#1e3329;
+  --btn-fg:#10201a; color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.6;margin:0}
+a{color:var(--pen)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:310px minmax(0,1fr);min-height:100%}
+
+/* ---------- sommaire ---------- */
+.side{background:var(--surface);border-right:1px solid var(--line);position:sticky;top:0;align-self:start;height:100vh;height:100dvh;overflow-y:auto;
+  padding-block:20px 28px;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:18px}
+.brand{font-family:var(--f-hand);font-weight:700;font-size:1.9rem;line-height:1.05;color:var(--rouge);margin:0 0 2px}
+.brand-sub{margin:0 0 14px;color:var(--muted);font-size:.92rem}
+.prog{margin:0 0 18px}
+.prog-bar{height:8px;border-radius:4px;background:var(--grid);overflow:hidden}
+.prog-fill{height:100%;width:0;background:var(--prof);transition:width .3s}
+.prog-txt{margin:6px 0 0;font-size:.88rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.nav-part{margin:16px 0 6px;font-size:.78rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.nav-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.nav-list a{display:grid;grid-template-columns:26px minmax(0,1fr);gap:8px;align-items:start;padding:7px 8px;border-radius:4px;text-decoration:none;color:var(--ink);font-size:.95rem;line-height:1.3}
+.nav-list a:hover{background:var(--pen-bg)}
+.nav-list a[aria-current="page"]{background:var(--pen-bg);color:var(--pen);font-weight:700}
+.nav-n{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--line);font-size:.78rem;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.nav-list a.done .nav-n{background:var(--prof);border-color:var(--prof);color:var(--btn-fg)}
+
+/* ---------- barre mobile ---------- */
+.topbar{display:none}
+.scrim{display:none}
+
+/* ---------- étape ---------- */
+.main{min-width:0;padding-block:0 60px}
+.lesson{max-width:860px;margin:0 auto;padding-left:max(22px,env(safe-area-inset-left,0px));padding-right:max(22px,env(safe-area-inset-right,0px))}
+.lhead{padding:30px 0 16px;margin:0 0 6px;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;
+  border-bottom:2px solid var(--rouge)}
+.eyebrow{margin:0 0 4px;font-size:.84rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;display:flex;gap:12px;flex-wrap:wrap;align-items:baseline}
+.eyebrow .meta{letter-spacing:0;text-transform:none;font-weight:600;color:var(--prof)}
+.lhead h2{font-family:var(--f-hand);font-weight:700;font-size:clamp(2.1rem,5.2vw,3rem);line-height:1.05;margin:0;color:var(--rouge);text-wrap:balance}
+.lbody{display:flex;flex-direction:column;gap:14px;padding-top:16px}
+.lbody > p,.lbody > ul,.lbody > ol{margin:0;max-width:70ch}
+.lbody ul,.lbody ol{padding-left:1.3em}
+.lbody li{margin:4px 0}
+.lbody h3{font-size:1.22rem;margin:14px 0 0;line-height:1.25;text-wrap:balance}
+.lead{font-size:1.15rem}
+.objectif{font-size:1.08rem;color:var(--muted);font-weight:600}
+.objectif::before{content:"Objectif : ";color:var(--pen);font-weight:700}
+
+mjx-container[display="true"]{overflow-x:auto;overflow-y:hidden;max-width:100%;padding:4px 0;margin:.5em 0 !important}
+mjx-container{color:inherit}
+
+.lab{margin:0 0 6px;font-size:.78rem;letter-spacing:.07em;text-transform:uppercase;font-weight:700;font-family:var(--f-body)}
+.retenir{border:2px solid var(--rouge);border-radius:4px;background:var(--rouge-bg);padding:12px 16px}
+.retenir .lab{color:var(--rouge)}
+.retenir p,.retenir ul,.retenir ol{margin:6px 0}
+.retenir ul,.retenir ol{padding-left:1.3em}
+.prof{background:var(--prof-bg);border-radius:4px;padding:12px 16px;color:var(--prof);font-family:var(--f-prof);font-size:1rem;line-height:1.55}
+.prof .lab{color:var(--prof)}
+.prof p,.prof ul{margin:4px 0}
+.prof ul{padding-left:1.2em}
+.copie{border:1px solid var(--line);border-radius:3px;padding:14px 16px 12px;color:var(--pen);font-family:var(--f-hand);font-size:1.42rem;line-height:1.5;min-width:0;
+  background-color:var(--surface);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
+.copie .lab{color:var(--muted)}
+.copie p{margin:4px 0}
+.copie mjx-container{font-size:.82em}
+.copie u{text-decoration-thickness:1.5px;text-underline-offset:3px}
+
+.video{margin:6px 0;display:flex;flex-direction:column;gap:6px}
+.video video{width:100%;max-width:100%;aspect-ratio:16/9;background:#101614;border-radius:4px;border:1px solid var(--line);display:block}
+.video figcaption{font-size:.95rem;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:baseline}
+.tag{font-size:.74rem;letter-spacing:.07em;text-transform:uppercase;font-weight:700;color:var(--btn-fg);background:var(--pen);padding:2px 7px;border-radius:3px}
+.dur{font-variant-numeric:tabular-nums}
+
+.table-wrap{overflow-x:auto;max-width:100%}
+table{border-collapse:collapse;width:100%;min-width:480px;font-size:.98rem}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--pen-bg);font-weight:700}
+
+.exos-h{border-top:1px solid var(--line);padding-top:18px;margin-top:18px !important}
+.exo{border:1px solid var(--line);border-radius:4px;background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.exo-n{margin:0;font-weight:700;color:var(--pen);font-size:.86rem;letter-spacing:.06em;text-transform:uppercase}
+.exo-q p{margin:4px 0}
+.exo details{display:flex;flex-direction:column;gap:10px}
+.exo summary{cursor:pointer;font-weight:700;color:var(--pen);padding:6px 0;width:max-content;max-width:100%}
+.exo details[open] summary{margin-bottom:8px}
+.exo details > * + *{margin-top:10px}
+
+.howto{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.howto > div{border:1px solid var(--line);border-radius:4px;background:var(--surface);padding:12px 14px}
+.howto p{margin:0}
+.howto .num{font-family:var(--f-hand);font-weight:700;font-size:2rem;line-height:1;color:var(--rouge);margin-bottom:4px}
+
+.chrono{border:2px solid var(--pen);border-radius:4px;background:var(--pen-bg);padding:14px 16px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.chrono-lab{margin:0;font-weight:700}
+.chrono-t{margin:0;font-size:3rem;line-height:1;font-weight:700;font-variant-numeric:tabular-nums;color:var(--pen)}
+.chrono-b{display:flex;gap:10px;flex-wrap:wrap}
+.chrono-end{margin:0;font-weight:700;color:var(--rouge)}
+
+.btn{border:1.5px solid var(--pen);background:var(--pen);color:var(--btn-fg);font-weight:700;padding:10px 16px;border-radius:4px;cursor:pointer;text-decoration:none;display:inline-block;line-height:1.2}
+.btn.ghost{background:transparent;color:var(--pen)}
+.btn[disabled]{opacity:.45;cursor:default}
+.pager{max-width:860px;margin:30px auto 0;padding-left:max(22px,env(safe-area-inset-left,0px));padding-right:max(22px,env(safe-area-inset-right,0px));display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;align-items:center}
+.pager .right{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.done-note{color:var(--prof);font-weight:700;margin:0}
+
+@media (max-width: 880px){
+  .app{display:block}
+  .topbar{display:flex;position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line);
+    padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));gap:12px;align-items:center;justify-content:space-between}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+  .topbar .brand{font-size:1.45rem;margin:0}
+  .topbar .mini{font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums;margin:0}
+  .side{position:fixed;inset:0 auto 0 0;width:min(88vw,330px);z-index:40;transform:translateX(-102%);transition:transform .22s;height:auto;
+    padding-top:calc(18px + env(safe-area-inset-top,0px));padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+  .side.open{transform:none;box-shadow:0 0 40px rgba(0,0,0,.35)}
+  .scrim{display:block;position:fixed;inset:0;z-index:30;background:rgba(10,16,30,.45)}
+  .lesson,.pager{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .lhead{padding-top:20px}
+  body{font-size:16.5px}
+  .copie{font-size:1.3rem;padding:12px 12px 10px}
+  .pager .btn{flex:1 1 auto;text-align:center}
+}
+@media (prefers-reduced-motion: reduce){.side,.prog-fill{transition:none}}
+</style>
+<style>
+/* ---------- ajouts : logo, graphiques interactifs, plan ---------- */
+.brand-row{display:grid;grid-template-columns:54px minmax(0,1fr);gap:12px;align-items:center;margin:0 0 14px}
+.brand-row img{width:54px;height:54px;border-radius:8px;display:block}
+.brand-row .brand{font-size:1.6rem;margin:0}
+.brand-row .brand-sub{margin:2px 0 0}
+.topbar img{width:32px;height:32px;border-radius:6px;display:block}
+.topbar .tb-mid{display:flex;gap:8px;align-items:center;min-width:0}
+
+.graphfig{margin:6px 0;display:flex;flex-direction:column;gap:8px;min-width:0}
+.graphfig figcaption{font-size:.95rem;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:baseline}
+.graph{border:1px solid var(--line);border-radius:4px;background:var(--surface);padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.g-cv{width:100%;height:300px;display:block;border-radius:3px}
+.g-ctl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center}
+.g-ctl label{font-weight:700;color:var(--pen);font-size:.92rem}
+.g-ctl input[type=range]{width:100%;accent-color:var(--pen);min-width:0;height:28px}
+.g-read{margin:0;font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink);white-space:pre-line;font-size:.98rem;min-height:1.6em;overflow-wrap:anywhere}
+.g-opts{display:flex;gap:8px;flex-wrap:wrap}
+.g-opt{border:1.5px solid var(--line);background:transparent;color:var(--ink);padding:6px 12px;border-radius:4px;cursor:pointer;font-weight:600}
+.g-opt[aria-pressed="true"]{border-color:var(--pen);background:var(--pen-bg);color:var(--pen)}
+
+.plan{display:flex;flex-direction:column;gap:8px;list-style:none;margin:0;padding:0 !important;max-width:none !important}
+.plan li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:baseline;border:1px solid var(--line);border-radius:4px;background:var(--surface);padding:10px 14px;margin:0}
+.plan p{margin:0}
+.plan .what{color:var(--muted);font-size:.95rem}
+.badge{font-size:.74rem;letter-spacing:.07em;text-transform:uppercase;font-weight:700;padding:2px 8px;border-radius:3px;white-space:nowrap}
+.badge.ok{background:var(--prof-bg);color:var(--prof)}
+.badge.soon{background:var(--grid);color:var(--muted)}
+.methode{counter-reset:m;list-style:none;padding:0 !important;display:flex;flex-direction:column;gap:8px}
+.methode li{counter-increment:m;position:relative;padding-left:34px;margin:0}
+.methode li::before{content:counter(m);position:absolute;left:0;top:-2px;font-family:var(--f-hand);font-weight:700;font-size:1.7rem;line-height:1.1;color:var(--rouge)}
+.lbody p{overflow-x:auto;overflow-y:hidden}
+td.c,th.c{text-align:center}
+@media (max-width: 880px){ .g-cv{height:250px} .brand-row .brand{font-size:1.45rem} }
+.graphfig figcaption{display:block}
+.graphfig figcaption .tag{margin-right:6px}
+mjx-container[display="true"]{overflow-x:auto;overflow-y:hidden;max-width:100%}
+/* ---------- évaluations ---------- */
+.eval{display:flex;flex-direction:column;gap:14px}
+.ev-intro{border:2px solid var(--pen);border-radius:4px;background:var(--pen-bg);padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.ev-intro ul{margin:0}
+.ev-meta{display:flex;gap:18px;flex-wrap:wrap;margin:0;font-size:1.05rem}
+.ev-actions{display:flex;gap:10px;flex-wrap:wrap}
+.ev-actions .btn{flex:0 1 auto}
+.ev-best{margin:0;font-weight:700;color:var(--prof)}
+.ev-bar{position:sticky;top:8px;z-index:6;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border:2px solid var(--pen);border-radius:4px;background:var(--surface);padding:8px 14px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.ev-t{margin:0;font-size:2rem;line-height:1;font-weight:700;font-variant-numeric:tabular-nums;color:var(--pen)}
+.ev-t.low{color:var(--rouge)}
+.ev-btns{display:flex;gap:8px}
+.ev-btns .btn{flex:0 1 auto;padding:8px 14px}
+.ev-sujet,.ev-cor{display:flex;flex-direction:column;gap:10px}
+.ev-ex{margin:12px 0 0;font-size:1.12rem;color:var(--pen)}
+.ev-ex span{font-weight:600;color:var(--muted);font-size:.95rem}
+.ev-help{margin:0;color:var(--muted)}
+.bar{display:grid;grid-template-columns:76px minmax(0,1fr);gap:10px;align-items:start;border-top:1px dashed var(--line);padding-top:8px}
+.bar-chk{white-space:nowrap;display:flex;gap:6px;align-items:center;font-weight:700;color:var(--rouge);font-size:.92rem;cursor:pointer;padding-top:2px}
+.bar-chk input{width:18px;height:18px;accent-color:var(--prof);margin:0}
+.bar-body p{margin:0 0 6px}
+.bar-body{min-width:0}
+.ev-score{border:2px solid var(--prof);border-radius:4px;background:var(--prof-bg);padding:12px 16px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.ev-note{margin:0;font-size:1.3rem}
+.ev-avis{margin:0}
+.ev-score .btn{flex:0 1 auto}
+@media (max-width: 880px){ .ev-bar{top:64px} .bar{grid-template-columns:70px minmax(0,1fr);gap:8px} .bar-chk{font-size:.85rem} }
+.video figcaption{display:block}
+.video figcaption .tag{margin-right:6px}
+
+</style>
+
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <button type="button" class="btn ghost" id="menu-btn" aria-controls="side" aria-expanded="false">Sommaire</button>
+    <div class="tb-mid"><img src="assets/img/logo-mathnexus.png" alt=""><p class="brand">Nombres complexes</p></div>
+    <p class="mini" id="mini-prog"></p>
+  </div>
+  <div class="scrim" id="scrim" hidden></div>
+
+  <nav class="side" id="side" aria-label="Sommaire du parcours">
+    <div class="brand-row">
+      <img src="assets/img/logo-mathnexus.png" alt="Logo Mathnexus">
+      <div><p class="brand">Parcours Nombres complexes</p><p class="brand-sub">Terminale S2 · Mathnexus Education</p></div>
+    </div>
+    <p class="brand-sub"><a href="index.html">Parcours Algèbre linéaire →</a><br><a href="suites-fonctions.html">Parcours Suites et fonctions →</a></p>
+    <div class="prog">
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+      <p class="prog-txt" id="prog-txt"></p>
+    </div>
+    <div id="nav"></div>
+  </nav>
+
+  <main class="main" id="main">
+<section class="lesson" id="accueil" data-part="" data-title="Comment utiliser ce parcours" hidden><header class="lhead"><p class="eyebrow">Bienvenue</p><h2>Comment utiliser ce parcours</h2></header><div class="lbody">
+<p class="lead">Ce parcours reprend <strong>tout le chapitre des nombres complexes</strong> du programme de Terminale S2 : le calcul, les équations, les formes trigonométrique et exponentielle, la géométrie et les suites. Les exercices sont construits sur le modèle des sujets du bac sénégalais.</p>
+
+<div class="howto">
+  <div><p class="num">1</p><p><strong>Lis l'explication</strong>. Les encadrés rouges sont à connaître par cœur.</p></div>
+  <div><p class="num">2</p><p><strong>Manipule le graphique</strong> quand il y en a un : déplace les curseurs et regarde ce que deviennent les points et les nombres.</p></div>
+  <div><p class="num">3</p><p><strong>Fais les exercices sur une feuille</strong>, puis ouvre la correction et compare ligne à ligne.</p></div>
+  <div><p class="num">4</p><p><strong>Valide l'étape</strong> avec le bouton du bas. Ta progression est gardée sur cet appareil.</p></div>
+</div>
+
+<h3>Le plan</h3>
+<ul class="plan">
+  <li><div><p><strong>Partie 1 · La forme algébrique</strong></p><p class="what">Calculs dans \(\C\), conjugué, quotients, affixes de points et de vecteurs, milieu, barycentre, alignement.</p></div><span class="badge ok">Disponible</span></li>
+  <li><div><p><strong>Partie 2 · Les équations</strong></p><p class="what">Racines carrées d'un complexe, équations du second degré, équations de degré 3 avec une racine réelle ou imaginaire pure.</p></div><span class="badge ok">Disponible</span></li>
+  <li><div><p><strong>Partie 3 · Module, argument et formes</strong></p><p class="what">Module, argument, formes trigonométrique et exponentielle, Moivre, Euler, linéarisation, valeurs exactes de \(\cos\frac{\pi}{12}\).</p></div><span class="badge soon">Bientôt</span></li>
+  <li><div><p><strong>Partie 4 · Racines \(n\)-ièmes</strong></p><p class="what">Racines \(n\)-ièmes de l'unité et d'un complexe, polygones réguliers, somme des racines, calcul de \(\cos\frac{2\pi}{5}\).</p></div><span class="badge soon">Bientôt</span></li>
+  <li><div><p><strong>Partie 5 · Complexes et géométrie</strong></p><p class="what">Distances et angles, nature d'un triangle, points cocycliques, ensembles de points.</p></div><span class="badge soon">Bientôt</span></li>
+  <li><div><p><strong>Partie 6 · Complexes et suites</strong></p><p class="what">Suites de complexes \((z_n)\), suites du module et de l'argument, produits \(z_0z_1\cdots z_n\).</p></div><span class="badge soon">Bientôt</span></li>
+  <li><div><p><strong>Pour finir</strong></p><p class="what">Ce que le correcteur attend, puis des exercices complets type bac, corrigés.</p></div><span class="badge soon">Bientôt</span></li>
+</ul>
+
+<h3>Une évaluation à la fin de chaque partie</h3>
+<p>Chaque partie se termine par une évaluation chronométrée, notée sur 20, qui reprend <strong>toute la partie</strong>. Le sujet s'affiche au lancement du chronomètre ; le corrigé et le barème apparaissent à la fin. Tu te notes toi-même, et ta meilleure note est gardée sur cet appareil.</p>
+<p>Les vidéos des méthodes clés arrivent bientôt.</p>
+
+<h3>Ce qui n'est pas dans ce parcours</h3>
+<p>Les transformations du plan (translations, rotations, homothéties, similitudes) feront l'objet d'un parcours à part.</p>
+
+<div class="prof"><p class="lab">Le mot du prof</p><p>Ne passe pas à l'étape suivante tant que les exercices ne sont pas réussis <em>sans regarder la correction</em>. Au bac, l'exercice sur les complexes rapporte souvent 4 à 5 points, et ce sont des points sûrs pour qui calcule proprement.</p></div>
+</div></section>
+<section class="lesson" id="carte" data-part="Partie 1 · La forme algébrique" data-title="La carte d&#x27;un exercice de bac" hidden><header class="lhead"><p class="eyebrow">Partie 1 · La forme algébrique · Étape 1<span class="meta">6 min</span></p><h2>La carte d'un exercice de bac</h2></header><div class="lbody">
+<p class="objectif">Savoir comment l'exercice de complexes est construit au bac, pour reconnaître chaque question dès la lecture du sujet.</p>
+
+<h3>Un exercice de bac a presque toujours trois temps</h3>
+<p>Depuis plus de trente ans, les sujets du bac S2 suivent le même schéma. Si tu le connais, tu sais à l'avance quel outil sortir à chaque question.</p>
+
+<div class="table-wrap"><table>
+<thead><tr><th>Temps</th><th>Ce qu'on te demande</th><th>Où l'apprendre</th></tr></thead>
+<tbody>
+<tr><td><strong>1. L'équation</strong></td><td>Résoudre une équation de degré 2 ou 3 : « montrer que l'équation admet une solution imaginaire pure », « factoriser », « achever la résolution ».</td><td>Partie 2</td></tr>
+<tr><td><strong>2. Les formes</strong></td><td>Écrire les solutions ou un quotient sous forme trigonométrique ou exponentielle, calculer une puissance, en déduire \(\cos\frac{\pi}{12}\) ou \(\sin\frac{5\pi}{12}\).</td><td>Parties 3 et 4</td></tr>
+<tr><td><strong>3. La géométrie</strong></td><td>Placer les points images des solutions, calculer \(\dfrac{z_C-z_A}{z_B-z_A}\), en déduire la nature du triangle \(ABC\), montrer que des points sont sur un même cercle, trouver un ensemble de points.</td><td>Parties 1 et 5</td></tr>
+</tbody>
+</table></div>
+
+<div class="copie"><p class="lab">Un exemple : le bac 2007</p>
+<p>On considère \((E)\) : \(z^3-(3+2i)z^2+(1+4i)z+1-2i\)<wbr>\({}=0\).</p>
+<p>1. a) Déterminer la solution réelle de \((E)\). b) Montrer que \(i\) est solution. c) Déterminer la troisième solution.</p>
+<p>2. Soit \(A\), \(B\), \(C\) les points d'affixes \(1\), \(i\) et \(2+i\). a) Déterminer le module et un argument de \(\dfrac{z_B-z_A}{z_C-z_A}\). b) En déduire la nature du triangle \(ABC\).</p>
+</div>
+<p>On retrouve les trois temps : l'équation (question 1), la forme trigonométrique d'un quotient (2a), la géométrie (2b). À la fin du parcours, tu sauras faire cet exercice en entier.</p>
+
+<div class="retenir"><p class="lab">À retenir</p><ul>
+<li>Chaque question utilise la précédente. « <strong>En déduire</strong> » veut dire : sers-toi du résultat que tu viens de trouver.</li>
+<li>Les solutions de l'équation deviennent presque toujours les <strong>affixes des points</strong> de la partie géométrique. Une erreur de calcul au début fausse tout l'exercice : vérifie tes solutions en les remplaçant dans l'équation.</li>
+<li>Si tu n'arrives pas à démontrer un résultat donné par l'énoncé, <strong>admets-le</strong> et continue.</li>
+</ul></div>
+
+<h3>Les trois écritures d'un nombre complexe</h3>
+<p>Tout le chapitre tourne autour de trois façons d'écrire le même nombre. Chacune sert à quelque chose de précis.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Écriture</th><th>Exemple</th><th>Elle sert à…</th></tr></thead>
+<tbody>
+<tr><td>Algébrique \(a+ib\)</td><td>\(1+i\)</td><td>additionner, résoudre les équations, placer un point</td></tr>
+<tr><td>Trigonométrique \(r(\cos\theta+i\sin\theta)\)</td><td>\(\sqrt2\left(\cos\frac\pi4+i\sin\frac\pi4\right)\)</td><td>lire un module et un argument, trouver des valeurs exactes de cosinus</td></tr>
+<tr><td>Exponentielle \(re^{i\theta}\)</td><td>\(\sqrt2\,e^{i\frac\pi4}\)</td><td>multiplier, diviser, calculer des puissances</td></tr>
+</tbody>
+</table></div>
+
+<h3 class="exos-h">Vérifie que tu as compris</h3>
+<article class="exo"><p class="exo-n">Exercice 1</p><div class="exo-q"><p>Dans l'exemple du bac 2007, pourquoi l'énoncé demande-t-il d'abord de « montrer que \(i\) est solution » ?</p></div>
+<details class="tex2jax_ignore"><summary>Voir la correction</summary><div class="copie"><p class="lab">Correction</p><p>Une équation de degré 3 ne se résout pas directement. Quand on connaît une solution, on factorise le polynôme et il reste une équation de degré 2, qu'on sait résoudre.</p><p>Ici l'énoncé donne même deux solutions (la solution réelle et \(i\)) : la troisième se trouve sans calcul de discriminant. Tu verras comment à l'étape 7.</p></div></details></article>
+<article class="exo"><p class="exo-n">Exercice 2</p><div class="exo-q"><p>Range ces questions dans l'ordre où elles apparaissent dans un sujet :</p><p><strong>a.</strong> En déduire la nature du triangle \(ABC\). <strong>b.</strong> Résoudre dans \(\C\) l'équation \(z^2-2z+4=0\). <strong>c.</strong> Écrire les solutions sous forme exponentielle. <strong>d.</strong> Placer les points \(A\) et \(B\) d'affixes les solutions.</p></div>
+<details class="tex2jax_ignore"><summary>Voir la correction</summary><div class="copie"><p class="lab">Correction</p><p>b, c, d, a.</p><p>L'équation d'abord, puis la forme des solutions, puis les points, puis la géométrie.</p></div></details></article>
+</div></section>
+<section class="lesson" id="algebrique" data-part="Partie 1 · La forme algébrique" data-title="Calculer avec la forme algébrique" hidden><header class="lhead"><p class="eyebrow">Partie 1 · La forme algébrique · Étape 2<span class="meta">16 min</span></p><h2>Calculer avec la forme algébrique</h2></header><div class="lbody">
+<p class="objectif">Savoir écrire un nombre complexe sous la forme \(a+ib\), identifier sa partie réelle et sa partie imaginaire, et calculer sans erreur.</p>
+
+<h3>Le nombre \(i\)</h3>
+<p>Aucun réel n'a un carré négatif. On crée donc un nouveau nombre, noté \(i\), dont le carré vaut \(-1\). Avec lui, on fabrique les <strong>nombres complexes</strong>.</p>
+<div class="retenir"><p class="lab">À connaître par cœur</p><ul>
+<li>\(i^2=-1\).</li>
+<li>Tout nombre complexe \(z\) s'écrit de façon unique \(z=a+ib\), avec \(a\) et \(b\) <strong>réels</strong>. C'est la <strong>forme algébrique</strong> de \(z\).</li>
+<li>\(a\) est la <strong>partie réelle</strong> : \(\Re(z)=a\). \(b\) est la <strong>partie imaginaire</strong> : \(\Im(z)=b\). Attention, \(\Im(z)\) est le réel \(b\), pas \(ib\).</li>
+<li>Si \(b=0\), \(z\) est un <strong>réel</strong>. Si \(a=0\), \(z=ib\) est un <strong>imaginaire pur</strong>.</li>
+<li><strong>Égalité :</strong> \(a+ib=a'+ib'\) si et seulement si \(a=a'\) et \(b=b'\).</li>
+</ul></div>
+<p>Les règles de calcul sont celles des réels : on développe, on regroupe, et on remplace \(i^2\) par \(-1\) dès qu'il apparaît.</p>
+<div class="copie"><p class="lab">Sur la copie</p><p>\((2+3i)(1-i)\)<wbr>\({}=2-2i+3i-3i^2\)<wbr>\({}=2+i-3\times(-1)\)<wbr>\({}=5+i\).</p>
+<p>Donc \(\Re\big((2+3i)(1-i)\big)\)<wbr>\({}=5\) et \(\Im\big((2+3i)(1-i)\big)\)<wbr>\({}=1\).</p></div>
+
+<h3>Les puissances de \(i\)</h3>
+<p>\(i^0=1\), \(i^1=i\), \(i^2=-1\), \(i^3=i^2\times i=-i\), \(i^4=(i^2)^2=1\). Puis tout recommence : les puissances de \(i\) reviennent tous les 4.</p>
+<figure class="graphfig"><div class="graph" data-fig="puissances" data-alt="Les points 1, i, −1, −i et la puissance i^n choisie"></div><figcaption><span class="tag">À toi</span> Augmente \(n\) d'un cran à la fois. Le point fait le tour des quatre valeurs \(1\), \(i\), \(-1\), \(-i\), toujours dans le même ordre.</figcaption></figure>
+<div class="retenir"><p class="lab">La méthode</p><p>Pour calculer \(i^n\), on fait la division euclidienne de \(n\) par 4 : \(n=4q+r\) avec \(r\in\{0,1,2,3\}\). Alors \(i^n\)<wbr>\({}=(i^4)^q\times i^r\)<wbr>\({}=i^r\).</p></div>
+<div class="copie"><p class="lab">Sur la copie</p><p>\(2026=4\times506+2\), donc \(i^{2026}=i^2=-1\).</p></div>
+
+<h3>Les identités remarquables</h3>
+<p>Elles restent vraies. Deux résultats reviennent sans cesse, apprends-les :</p>
+\[(1+i)^2=1+2i+i^2=2i\]
+\[(a+ib)(a-ib)=a^2-(ib)^2=a^2+b^2\]
+<p>Le second dit qu'un complexe multiplié par « le même avec le signe opposé devant \(i\) » donne un <strong>réel positif</strong>. C'est la clé de l'étape suivante.</p>
+<div class="copie"><p class="lab">Sur la copie</p><p>\((1+i)^4\)<wbr>\({}=\big((1+i)^2\big)^2\)<wbr>\({}=(2i)^2\)<wbr>\({}=4i^2\)<wbr>\({}=-4\), puis \((1+i)^8=(-4)^2=16\).</p></div>
+
+<h3>Avec une inconnue : poser \(z=x+iy\)</h3>
+<p>Beaucoup de questions de bac commencent par « on pose \(z=x+iy\), avec \(x\) et \(y\) réels ». On remplace alors \(z\) par \(x+iy\), on développe, et on range le résultat en deux paquets : ce qui ne contient pas \(i\) (la partie réelle) et ce qui est multiplié par \(i\) (la partie imaginaire).</p>
+<div class="retenir"><p class="lab">La méthode</p><ol class="methode">
+<li>J'écris chaque facteur sous la forme (réel) \(+\,i\,\)(réel).</li>
+<li>Je développe avec la double distributivité, et je remplace \(i^2\) par \(-1\).</li>
+<li>Je regroupe : partie réelle d'un côté, partie imaginaire de l'autre.</li>
+</ol></div>
+<div class="copie"><p class="lab">Sur la copie</p><p>Premier exemple : \(z^2\)<wbr>\({}=(x+iy)^2\)<wbr>\({}=x^2+2ixy+i^2y^2\)<wbr>\({}=(x^2-y^2)+i\,(2xy)\).</p>
+<p>Donc \(\Re(z^2)=x^2-y^2\) et \(\Im(z^2)=2xy\).</p></div>
+<div class="copie"><p class="lab">Sur la copie</p><p>Deuxième exemple : soit \(Z=(z-1)(z+i)\).</p>
+<p>1. \(z-1=(x-1)+iy\) et \(z+i=x+i(y+1)\).</p>
+<p>2. \(Z\)<wbr>\({}=(x-1)x+i(x-1)(y+1)+ixy+i^2y(y+1)\).</p>
+<p>3. Sans \(i\) : \((x-1)x-y(y+1)\)<wbr>\({}=x^2-x-y^2-y\). Devant \(i\) : \((x-1)(y+1)+xy=2xy+x-y-1\).</p>
+<p><u>\(\Re(Z)=x^2-x-y^2-y\) et \(\Im(Z)=2xy+x-y-1\).</u></p></div>
+<p>Contrôle rapide : pour \(z=0\) (\(x=y=0\)), \(Z=(-1)\times i=-i\). Les formules donnent \(\Re(Z)=0\) et \(\Im(Z)=-1\). ✔ Tester une valeur simple permet de repérer une erreur de signe.</p>
+
+<div class="prof"><p class="lab">Ce qui coûte des points</p><ul>
+<li>Oublier de remplacer \(i^2\) par \(-1\). Une réponse qui contient encore \(i^2\) n'est pas sous forme algébrique.</li>
+<li>Écrire \(\Im(z)=3i\) au lieu de \(\Im(z)=3\).</li>
+<li>Utiliser l'égalité \(a+ib\)<wbr>\({}=a'+ib'\Rightarrow a\)<wbr>\({}=a'\) sans vérifier que \(a\), \(b\), \(a'\), \(b'\) sont réels.</li>
+<li>Comparer deux complexes avec \(&lt;\) ou \(&gt;\) : un complexe non réel n'a pas de signe, et on ne range pas les complexes.</li>
+</ul></div>
+
+<h3 class="exos-h">Vérifie que tu as compris</h3>
+<article class="exo"><p class="exo-n">Exercice 1</p><div class="exo-q"><p>Écris sous forme algébrique : <strong>a.</strong> \((3-2i)(4+i)\) &nbsp; <strong>b.</strong> \((2-i)^2\) &nbsp; <strong>c.</strong> \((1+i)^3\) &nbsp; <strong>d.</strong> \(i^{2027}\)</p></div>
+<details class="tex2jax_ignore"><summary>Voir la correction</summary><div class="copie"><p class="lab">Correction</p><p>a. \((3-2i)(4+i)\)<wbr>\({}=12+3i-8i-2i^2\)<wbr>\({}=12-5i+2\)<wbr>\({}=14-5i\).</p>
+<p>b. \((2-i)^2\)<wbr>\({}=4-4i+i^2\)<wbr>\({}=4-4i-1\)<wbr>\({}=3-4i\).</p>
+<p>c. \((1+i)^3\)<wbr>\({}=(1+i)^2(1+i)\)<wbr>\({}=2i(1+i)\)<wbr>\({}=2i+2i^2\)<wbr>\({}=-2+2i\).</p>
+<p>d. \(2027=4\times506+3\), donc \(i^{2027}=i^3=-i\).</p></div></details></article>
+<article class="exo"><p class="exo-n">Exercice 2</p><div class="exo-q"><p>Détermine les réels \(x\) et \(y\) tels que \((x+2y)+i(x-y)=5+2i\).</p></div>
+<details class="tex2jax_ignore"><summary>Voir la correction</summary><div class="copie"><p class="lab">Correction</p><p>\(x\) et \(y\) sont réels, donc \(x+2y\) et \(x-y\) sont réels. Par identification des parties réelles et imaginaires :</p>
+\[\begin{cases}x+2y=5\\x-y=2\end{cases}\]
+<p>En soustrayant : \(3y=3\), donc \(y=1\), puis \(x=2+y=3\).</p></div>
+<div class="prof"><p class="lab">Remarque</p><p>Écris toujours la phrase « \(x\) et \(y\) sont réels » avant d'identifier : c'est elle qui justifie le système.</p></div></details></article>
+<article class="exo"><p class="exo-n">Exercice 3</p><div class="exo-q"><p>Soit \(z=x+iy\) avec \(x\) et \(y\) réels. Donne la partie réelle et la partie imaginaire de \(Z=(z+2)(2z-i)\) en fonction de \(x\) et \(y\).</p></div>
+<details class="tex2jax_ignore"><summary>Voir la correction</summary><div class="copie"><p class="lab">Correction</p><p>\(z+2=(x+2)+iy\) et \(2z-i=2x+i(2y-1)\). On développe :</p>
+\[Z=(x+2)\,2x+i(x+2)(2y-1)+2ixy+i^2\,y(2y-1)\]
+<p>On regroupe ce qui ne contient pas \(i\), puis ce qui est en facteur de \(i\) :</p>
+<p>\(\Re(Z)\)<wbr>\({}=2x(x+2)-y(2y-1)\)<wbr>\({}=2x^2+4x-2y^2+y\).</p>
+<p>\(\Im(Z)\)<wbr>\({}=(x+2)(2y-1)+2xy\)<wbr>\({}=4xy-x+4y-2\).</p></div></details></article>
+</div></section>
+<section class="lesson" id="conjugue" data-part="Partie 1 · La forme algébrique" data-title="Le conjugué et les quotients" hidden><header class="lhead"><p class="eyebrow">Partie 1 · La forme algébrique · Étape 3<span class="meta">14 min</span></p><h2>Le conjugué et les quotients</h2></header><div class="lbody">
+<p class="objectif">Connaître le conjugué et ses propriétés, mettre un quotient sous forme algébrique, et reconnaître un réel ou un imaginaire pur.</p>
+
+<h3>Le conjugué</h3>
+<div class="retenir"><p class="lab">À connaître par cœur</p><ul>
+<li>Le <strong>conjugué</strong> de \(z=a+ib\) est \(\bar z=a-ib\). On change seulement le signe de la partie imaginaire.</li>
+<li>\(z\,\bar z=a^2+b^2\) : c'est un <strong>réel positif</strong>.</li>
+<li>\(z+\bar z=2\Re(z)\) et \(z-\bar z=2i\Im(z)\).</li>
+<li>\(\overline{z+z'}\)<wbr>\({}=\bar z+\bar z'\), \(\overline{z\,z'}\)<wbr>\({}=\bar z\,\bar z'\), \(\overline{\left(\dfrac{z}{z'}\right)}\)<wbr>\({}=\dfrac{\bar z}{\bar z'}\), \(\overline{z^n}\)<wbr>\({}=(\bar z)^n\), \(\bar{\bar z}=z\).</li>
+</ul></div>
+<p>Dans le plan, le point d'affixe \(\bar z\) est le symétrique du point d'affixe \(z\) par rapport à l'axe des réels.</p>
+<figure class="graphfig"><div class="graph" data-fig="plan" data-alt="Point M d'affixe z, son conjugué M' et son opposé N"></div><figcaption><span class="tag">À toi</span> Change \(a\) et \(b\). Le point rouge \(M'(\bar z)\) reste le reflet de \(M(z)\) dans l'axe horizontal ; le point vert \(N(-z)\) est son symétrique par rapport à \(O\).</figcaption></figure>
+
+<h3>Mettre un quotient sous forme algébrique</h3>
+<div class="retenir"><p class="lab">La méthode</p><p>On multiplie le numérateur <strong>et</strong> le dénominateur par le <strong>conjugué du dénominateur</strong>. Le dénominateur devient le réel \(a^2+b^2\), et il ne reste qu'à développer le numérateur.</p></div>
+<div class="copie"><p class="lab">Sur la copie</p><p>\(\dfrac{i-3}{-1-2i}\)<wbr>\({}=\dfrac{(i-3)(-1+2i)}{(-1-2i)(-1+2i)}\)<wbr>\({}=\dfrac{-i+2i^2+3-6i}{(-1)^2+2^2}\)<wbr>\({}=\dfrac{1-7i}{5}\)<wbr>\({}=\dfrac15-\dfrac75i\).</p></div>
+<div class="copie"><p class="lab">Sur la copie</p><p>\(\dfrac{1}{2-i\sqrt3}\)<wbr>\({}=\dfrac{2+i\sqrt3}{(2-i\sqrt3)(2+i\sqrt3)}\)<wbr>\({}=\dfrac{2+i\sqrt3}{4+3}\)<wbr>\({}=\dfrac27+\dfrac{\sqrt3}{7}\,i\).</p></div>
+<p>Deux quotients à connaître : \(\dfrac1i\)<wbr>\({}=\dfrac{-i}{i\times(-i)}\)<wbr>\({}=-i\), et \(\dfrac{1+i}{1-i}\)<wbr>\({}=\dfrac{(1+i)^2}{1^2+1^2}\)<wbr>\({}=\dfrac{2i}{2}\)<wbr>\({}=i\).</p>
+
+<h3>Reconnaître un réel ou un imaginaire pur</h3>
+<div class="retenir"><p class="lab">À connaître par cœur</p><ul>
+<li>\(Z\) est réel \(\iff\Im(Z)\)<wbr>\({}=0\)<wbr>\({}\iff\bar Z\)<wbr>\({}=Z\).</li>
+<li>\(Z\) est imaginaire pur \(\iff\Re(Z)\)<wbr>\({}=0\)<wbr>\({}\iff\bar Z\)<wbr>\({}=-Z\).</li>
+</ul></div>
+<p>Au bac, on pose souvent \(z=x+iy\) et on demande la partie réelle et la partie imaginaire d'un quotient \(Z\) en fonction de \(x\) et \(y\). On applique exactement la méthode du conjugué.</p>
+<div class="copie"><p class="lab">Sur la copie</p><p>Soit \(z=x+iy\) (\(x\), \(y\) réels, \(z\neq2\)) et \(Z\)<wbr>\({}=\dfrac{z+1-i}{z-2}\)<wbr>\({}=\dfrac{(x+1)+i(y-1)}{(x-2)+iy}\).</p>
+<p>On multiplie par le conjugué \((x-2)-iy\) du dénominateur. Le dénominateur devient \((x-2)^2+y^2\). Le numérateur vaut :</p>
+\[\big[(x+1)+i(y-1)\big]\big[(x-2)-iy\big]=(x+1)(x-2)+y(y-1)+i\big[(y-1)(x-2)-y(x+1)\big]\]
+<p>Donc \(\Re(Z)\)<wbr>\({}=\dfrac{x^2+y^2-x-y-2}{(x-2)^2+y^2}\) et \(\Im(Z)\)<wbr>\({}=\dfrac{-x-3y+2}{(x-2)^2+y^2}\).</p></div>
+<p>Avec ce calcul, « \(Z\) est réel » devient \(-x-3y+2=0\) : une droite. « \(Z\) est imaginaire pur » devient \(x^2+y^2-x-y-2=0\) : un cercle. Tu apprendras à reconnaître ces ensembles de points dans la partie 5.</p>
+
+<div class="prof"><p class="lab">Ce qui coûte des points</p><ul>
+<li>Multiplier seulement le dénominateur par le conjugué. On multiplie <strong>en haut et en bas</strong>, sinon le quotient change.</li>
+<li>Dans le développement \((a+ib)(c-id)\), le produit \(ib\times(-id)\)<wbr>\({}=-i^2bd\)<wbr>\({}=+bd\) : c'est là que se glissent les erreurs de signe. Fais-le lentement.</li>
+</ul></div>
+
+<h3 class="exos-h">Vérifie que tu as compris</h3>
+<article class="exo"><p class="exo-n">Exercice 1</p><div class="exo-q"><p>Écris sous forme algébrique : <strong>a.</strong> \(\dfrac{1+2i}{3-i}\) &nbsp; <strong>b.</strong> \(\dfrac{2+i}{1-i}\) &nbsp; <strong>c.</strong> \(\dfrac{5}{1+2i}\)</p></div>
+<details class="tex2jax_ignore"><summary>Voir la correction</summary><div class="copie"><p class="lab">Correction</p><p>a. \(\dfrac{(1+2i)(3+i)}{(3-i)(3+i)}\)<wbr>\({}=\dfrac{3+i+6i+2i^2}{9+1}\)<wbr>\({}=\dfrac{1+7i}{10}\)<wbr>\({}=\dfrac1{10}+\dfrac7{10}i\).</p>
+<p>b. \(\dfrac{(2+i)(1+i)}{(1-i)(1+i)}\)<wbr>\({}=\dfrac{2+2i+i+i^2}{2}\)<wbr>\({}=\dfrac{1+3i}{2}\)<wbr>\({}=\dfrac12+\dfrac32i\).</p>
+<p>c. \(\dfrac{5(1-2i)}{(1+2i)(1-2i)}\)<wbr>\({}=\dfrac{5(1-2i)}{5}\)<wbr>\({}=1-2i\).</p></div></details></article>
+<article class="exo"><p class="exo-n">Exercice 2</p><div class="exo-q"><p>Soit \(z\) un nombre complexe. Montre que \(Z=z^2+\bar z^2\) est un réel, et que \(W=z^2-\bar z^2\) est un imaginaire pur.</p></div>
+<details class="tex2jax_ignore"><summary>Voir la correction</summary><div class="copie"><p class="lab">Correction</p><p>\(\bar Z\)<wbr>\({}=\overline{z^2}+\overline{\bar z^2}\)<wbr>\({}=\bar z^2+z^2\)<wbr>\({}=Z\). Donc \(Z\) est réel.</p>
+<p>\(\bar W\)<wbr>\({}=\overline{z^2}-\overline{\bar z^2}\)<wbr>\({}=\bar z^2-z^2\)<wbr>\({}=-W\). Donc \(W\) est imaginaire pur.</p></div>
+<div class="prof"><p class="lab">Remarque</p><p>Avec le conjugué, pas besoin de poser \(z=x+iy\) : la preuve tient en une ligne.</p></div></details></article>
+<article class="exo"><p class="exo-n">Exercice 3</p><div class="exo-q"><p>Soit \(z=x+iy\) (\(x\), \(y\) réels, \(z\neq-i\)) et \(Z=\dfrac{z-i}{z+i}\). Exprime \(\Re(Z)\) et \(\Im(Z)\) en fonction de \(x\) et \(y\).</p></div>
+<details class="tex2jax_ignore"><summary>Voir la correction</summary><div class="copie"><p class="lab">Correction</p><p>\(Z\)<wbr>\({}=\dfrac{x+i(y-1)}{x+i(y+1)}\). On multiplie par le conjugué \(x-i(y+1)\). Le dénominateur devient \(x^2+(y+1)^2\).</p>
+<p>Numérateur :</p>
+\[\begin{aligned}\big[x+i(y-1)\big]\big[x-i(y+1)\big]&=x^2+(y-1)(y+1)+i\big[x(y-1)-x(y+1)\big]\\&=x^2+y^2-1-2ix\end{aligned}\]
+<p>Donc \(\Re(Z)\)<wbr>\({}=\dfrac{x^2+y^2-1}{x^2+(y+1)^2}\) et \(\Im(Z)\)<wbr>\({}=\dfrac{-2x}{x^2+(y+1)^2}\).</p></div>
+<div class="prof"><p class="lab">Remarque</p><p>Ce quotient est tombé au bac en 1992 et en 1995. \(Z\) est réel quand \(x=0\) (l'axe des imaginaires purs, privé du point \(-i\)), et imaginaire pur quand \(x^2+y^2=1\) (le cercle de centre \(O\) et de rayon 1, privé de \(-i\)).</p></div></details></article>
+</div></section>
+<section class="lesson" id="plan" data-part="Partie 1 · La forme algébrique" data-title="Le plan complexe : points et vecteurs" hidden><header class="lhead"><p class="eyebrow">Partie 1 · La forme algébrique · Étape 4<span class="meta">14 min</span></p><h2>Le plan complexe : points et vecteurs</h2></header><div class="lbody">
+<p class="objectif">Passer d'un point ou d'un vecteur à son affixe, calculer un milieu, un barycentre, et prouver un alignement ou un parallélogramme avec les complexes.</p>
+
+<h3>Affixe d'un point, affixe d'un vecteur</h3>
+<p>Le plan est muni d'un repère orthonormé direct \((O\,;\vec u,\vec v)\). Au point \(M(a\,;b)\) on associe le complexe \(z_M=a+ib\) : c'est l'<strong>affixe</strong> de \(M\). L'axe des abscisses devient l'axe des réels, l'axe des ordonnées l'axe des imaginaires purs.</p>
+<div class="retenir"><p class="lab">À connaître par cœur</p><ul>
+<li>Le vecteur \(\vect{AB}\) a pour affixe \(z_{\vect{AB}}=z_B-z_A\) (« arrivée moins départ »).</li>
+<li>Le milieu \(I\) de \([AB]\) a pour affixe \(z_I=\dfrac{z_A+z_B}{2}\).</li>
+<li>Le barycentre \(G\) de \((A,\alpha)\), \((B,\beta)\), \((C,\gamma)\), avec \(\alpha+\beta+\gamma\neq0\), a pour affixe \(z_G\)<wbr>\({}=\dfrac{\alpha z_A+\beta z_B+\gamma z_C}{\alpha+\beta+\gamma}\).</li>
+<li>\(\vect{AB}=\vect{DC}\) (\(ABCD\) parallélogramme) \(\iff z_B-z_A=z_C-z_D\).</li>
+</ul></div>
+<figure class="graphfig"><div class="graph" data-fig="vecteur" data-alt="Points A et B, vecteur AB et milieu I"></div><figcaption><span class="tag">À toi</span> Déplace le point \(B\). La flèche pointillée verte part de \(O\) : c'est le représentant de \(\vect{AB}\) d'origine \(O\), son extrémité a pour coordonnées les parties réelle et imaginaire de \(z_B-z_A\).</figcaption></figure>
+
+<div class="copie"><p class="lab">Sur la copie</p>
+<p>\(A\), \(B\), \(C\) ont pour coordonnées \((1\,;-3)\), \((4\,;5)\), \((-3\,;2)\). Donc \(z_A=1-3i\), \(z_B=4+5i\), \(z_C=-3+2i\).</p>
+<p>\(z_{\vect{AB}}\)<wbr>\({}=z_B-z_A\)<wbr>\({}=(4+5i)-(1-3i)\)<wbr>\({}=3+8i\).</p>
+<p>Milieu \(I\) de \([AB]\) : \(z_I\)<wbr>\({}=\dfrac{(1-3i)+(4+5i)}{2}\)<wbr>\({}=\dfrac52+i\).</p>
+<p>Barycentre \(G\) de \((A,1)\), \((B,2)\), \((C,3)\) : \(z_G\)<wbr>\({}=\dfrac{(1-3i)+2(4+5i)+3(-3+2i)}{6}\)<wbr>\({}=\dfrac{13i}{6}\).</p>
+</div>
+
+<h3>Prouver un alignement</h3>
+<p>\(A\), \(B\), \(C\) sont alignés quand \(\vect{AC}\) et \(\vect{AB}\) sont colinéaires, c'est-à-dire \(\vect{AC}=k\,\vect{AB}\) avec \(k\) <strong>réel</strong>. En affixes :</p>
+<div class="retenir"><p class="lab">À connaître par cœur</p><p>Si \(A\neq B\) : \(A\), \(B\), \(C\) sont alignés \(\iff\dfrac{z_C-z_A}{z_B-z_A}\) est un <strong>réel</strong>.</p></div>
+<div class="copie"><p class="lab">Sur la copie</p><p>Avec \(z_A=1+i\), \(z_B=3+2i\), \(z_C=7+4i\) : \(\dfrac{z_C-z_A}{z_B-z_A}\)<wbr>\({}=\dfrac{6+3i}{2+i}\)<wbr>\({}=\dfrac{3(2+i)}{2+i}\)<wbr>\({}=3\).</p>
+<p>Ce quotient est réel, donc \(A\), \(B\), \(C\) sont alignés. De plus \(\vect{AC}=3\,\vect{AB}\).</p></div>
+<p>Le même quotient \(\dfrac{z_C-z_A}{z_B-z_A}\) servira dans la partie 5 : quand il vaut \(i\), le triangle est rectangle isocèle ; quand il est imaginaire pur, il est rectangle. Ce quotient est l'outil principal de la géométrie avec les complexes.</p>
+
+<div class="prof"><p class="lab">Ce qui coûte des points</p><ul>
+<li>Écrire \(z_A-z_B\) pour l'affixe de \(\vect{AB}\). C'est toujours l'extrémité moins l'origine.</li>
+<li>Pour un parallélogramme \(ABCD\), l'ordre des lettres compte : c'est \(\vect{AB}=\vect{DC}\), pas \(\vect{AB}=\vect{CD}\).</li>
+</ul></div>
+
+<h3 class="exos-h">Vérifie que tu as compris</h3>
+<article class="exo"><p class="exo-n">Exercice 1</p><div class="exo-q"><p>Soit \(A(2-i)\), \(B(1+3i)\), \(C(-2+i)\). <strong>a.</strong> Calcule l'affixe de \(\vect{AB}\) et du milieu \(K\) de \([BC]\). <strong>b.</strong> Détermine l'affixe du point \(D\) tel que \(ABCD\) soit un parallélogramme.</p></div>
+<details class="tex2jax_ignore"><summary>Voir la correction</summary><div class="copie"><p class="lab">Correction</p><p>a. \(z_{\vect{AB}}\)<wbr>\({}=z_B-z_A\)<wbr>\({}=(1+3i)-(2-i)\)<wbr>\({}=-1+4i\). \(z_K\)<wbr>\({}=\dfrac{(1+3i)+(-2+i)}{2}\)<wbr>\({}=-\dfrac12+2i\).</p>
+<p>b. \(ABCD\) est un parallélogramme \(\iff\vect{AB}\)<wbr>\({}=\vect{DC}\)<wbr>\({}\iff z_B-z_A\)<wbr>\({}=z_C-z_D\), donc \(z_D\)<wbr>\({}=z_C-z_B+z_A\)<wbr>\({}=(-2+i)-(1+3i)+(2-i)\)<wbr>\({}=-1-3i\).</p></div></details></article>
+<article class="exo"><p class="exo-n">Exercice 2</p><div class="exo-q"><p>Les points \(A(1-i)\), \(B(2+i)\), \(C(4+5i)\) sont-ils alignés ? Et \(A\), \(B\), \(D(3+4i)\) ?</p></div>
+<details class="tex2jax_ignore"><summary>Voir la correction</summary><div class="copie"><p class="lab">Correction</p><p>\(\dfrac{z_C-z_A}{z_B-z_A}\)<wbr>\({}=\dfrac{3+6i}{1+2i}\)<wbr>\({}=\dfrac{3(1+2i)}{1+2i}\)<wbr>\({}=3\) est réel : \(A\), \(B\), \(C\) sont alignés.</p>
+<p>\(\dfrac{z_D-z_A}{z_B-z_A}\)<wbr>\({}=\dfrac{2+5i}{1+2i}\)<wbr>\({}=\dfrac{(2+5i)(1-2i)}{1+4}\)<wbr>\({}=\dfrac{2-4i+5i+10}{5}\)<wbr>\({}=\dfrac{12+i}{5}\) n'est pas réel : \(A\), \(B\), \(D\) ne sont pas alignés.</p></div></details></article>
+<article class="exo"><p class="exo-n">Exercice 3</p><div class="exo-q"><p>Soit \(A(1-3i)\), \(B(4+5i)\), \(C(-3+2i)\). On définit \(D\) et \(E\) par \(\vect{AD}\)<wbr>\({}=2\vect{AB}+\vect{AC}\) et \(3\vect{BE}=\vect{BC}\). Détermine \(z_D\) et \(z_E\), puis montre que \(A\), \(D\), \(E\) sont alignés.</p></div>
+<details class="tex2jax_ignore"><summary>Voir la correction</summary><div class="copie"><p class="lab">Correction</p><p>\(z_D-z_A\)<wbr>\({}=2(z_B-z_A)+(z_C-z_A)\)<wbr>\({}=2(3+8i)+(-4+5i)\)<wbr>\({}=2+21i\), donc \(z_D\)<wbr>\({}=(1-3i)+(2+21i)\)<wbr>\({}=3+18i\).</p>
+<p>\(3(z_E-z_B)\)<wbr>\({}=z_C-z_B\)<wbr>\({}=-7-3i\), donc \(z_E\)<wbr>\({}=z_B+\dfrac{-7-3i}{3}\)<wbr>\({}=\dfrac{5}{3}+4i\).</p>
+<p>\(z_D-z_A=2+21i\) et \(z_E-z_A\)<wbr>\({}=\dfrac23+7i\)<wbr>\({}=\dfrac13(2+21i)\). Donc \(\dfrac{z_D-z_A}{z_E-z_A}\)<wbr>\({}=3\) est réel : \(A\), \(D\), \(E\) sont alignés.</p></div></details></article>
+</div></section>
+<section class="lesson" id="eval-p1" data-part="Partie 1 · La forme algébrique" data-title="Évaluation de la partie 1" hidden><header class="lhead"><p class="eyebrow">Partie 1 · La forme algébrique · Étape 5<span class="meta">45 min</span></p><h2>Évaluation de la partie 1</h2></header><div class="lbody">
+<p class="objectif">Vérifier que toute la partie 1 est acquise : calcul algébrique, puissances de \(i\), conjugué et quotients, réel et imaginaire pur, points et vecteurs du plan complexe.</p>
+
+<div class="eval" data-min="45" data-id="p1"><div class="ev-intro"><p class="ev-meta"><span>Durée : <strong>45 minutes</strong></span><span>Noté sur <strong>20</strong></span></p><ul><li>Prépare une feuille, un stylo et un brouillon. Pas de calculatrice.</li><li>Le sujet s'affiche quand tu lances le chronomètre. Rédige comme le jour du devoir.</li><li>À la fin du temps, ou quand tu cliques sur « J'ai terminé », le corrigé et le barème apparaissent. Tu te notes toi-même, honnêtement.</li></ul><div class="ev-actions"><button type="button" class="btn ev-go">Commencer l'évaluation</button></div><p class="ev-best" hidden></p></div><div class="ev-bar" hidden><p class="ev-t" aria-live="off">45:00</p><div class="ev-btns"><button type="button" class="btn ghost ev-pause">Pause</button><button type="button" class="btn ev-end">J'ai terminé</button></div></div>
+<div class="ev-sujet tex2jax_ignore" hidden>
+<h4 class="ev-ex">Exercice 1 <span>(5 points)</span></h4></ex>
+<p>Écris sous forme algébrique :</p>
+<p><strong>a.</strong> \(z_1=(2-3i)(1+2i)\) &nbsp; <strong>b.</strong> \(z_2=(1+2i)^2-(1-2i)^2\) &nbsp; <strong>c.</strong> \(z_3=i^{2030}\) &nbsp; <strong>d.</strong> \(z_4=\dfrac{3+i}{1-2i}\) &nbsp; <strong>e.</strong> \(z_5=\dfrac{1}{(1+i)^2}\)</p>
+
+<h4 class="ev-ex">Exercice 2 <span>(4 points)</span></h4></ex>
+<p><strong>a.</strong> Détermine les réels \(x\) et \(y\) tels que \((2+i)x+(1-3i)y=4-5i\).</p>
+<p><strong>b.</strong> Soit \(z\) un complexe qui n'est pas imaginaire pur. Montre que \(Z\)<wbr>\({}=\dfrac{z-\bar z}{z+\bar z}\) est un imaginaire pur.</p>
+
+<h4 class="ev-ex">Exercice 3 <span>(5 points)</span></h4></ex>
+<p>On pose \(z=x+iy\), avec \(x\) et \(y\) réels et \(z\neq-2i\), et \(Z=\dfrac{z-1}{z+2i}\).</p>
+<p><strong>a.</strong> Exprime \(\Re(Z)\) et \(\Im(Z)\) en fonction de \(x\) et \(y\).</p>
+<p><strong>b.</strong> Donne la condition sur \(x\) et \(y\) pour que \(Z\) soit réel. Quelle est la nature de l'ensemble des points \(M(z)\) correspondants ?</p>
+<p><strong>c.</strong> Donne la condition sur \(x\) et \(y\) pour que \(Z\) soit imaginaire pur.</p>
+
+<h4 class="ev-ex">Exercice 4 <span>(6 points)</span></h4></ex>
+<p>Dans le plan complexe, on considère les points \(A\), \(B\), \(C\), \(E\) d'affixes \(z_A=2+i\), \(z_B=-1+3i\), \(z_C=8-3i\), \(z_E=4+5i\).</p>
+<p><strong>a.</strong> Calcule les affixes des vecteurs \(\vect{AB}\) et \(\vect{AC}\).</p>
+<p><strong>b.</strong> Montre que les points \(A\), \(B\), \(C\) sont alignés.</p>
+<p><strong>c.</strong> Calcule l'affixe du milieu \(I\) de \([BC]\).</p>
+<p><strong>d.</strong> Détermine l'affixe du point \(D\) tel que \(ABED\) soit un parallélogramme.</p>
+<p><strong>e.</strong> Calcule l'affixe du barycentre \(G\) de \((A,2)\), \((B,1)\), \((E,1)\).</p>
+</div>
+
+<div class="ev-cor tex2jax_ignore" hidden><h3>Corrigé et barème</h3><p class="ev-help">Compare ta copie ligne à ligne. Coche une case seulement si ta réponse est juste <strong>et justifiée</strong>.</p>
+<h4 class="ev-ex">Exercice 1 <span>(5 points)</span></h4></ex>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>a. \(z_1=2+4i-3i-6i^2=8+i\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>b. \((1+2i)^2=-3+4i\) et \((1-2i)^2=-3-4i\), donc \(z_2=8i\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>c. \(2030=4\times507+2\), donc \(z_3=i^2=-1\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>d. \(z_4\)<wbr>\({}=\dfrac{(3+i)(1+2i)}{(1-2i)(1+2i)}\)<wbr>\({}=\dfrac{3+6i+i-2}{5}\)<wbr>\({}=\dfrac15+\dfrac75i\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>e. \((1+i)^2=2i\), donc \(z_5\)<wbr>\({}=\dfrac{1}{2i}\)<wbr>\({}=\dfrac{-i}{2i\times(-i)}\)<wbr>\({}=-\dfrac12i\).</p></div></div>
+
+<h4 class="ev-ex">Exercice 2 <span>(4 points)</span></h4></ex>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>a. \((2+i)x+(1-3i)y\)<wbr>\({}=(2x+y)+i(x-3y)\). Comme \(x\) et \(y\) sont réels, on identifie : \(2x+y=4\) et \(x-3y=-5\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>De la première, \(y=4-2x\). Dans la seconde : \(x-12+6x=-5\), donc \(x=1\) et \(y=2\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>b. Méthode 1 : \(z-\bar z=2i\Im(z)\) et \(z+\bar z=2\Re(z)\neq0\) (car \(z\) n'est pas imaginaire pur), donc \(Z\)<wbr>\({}=i\,\dfrac{\Im(z)}{\Re(z)}\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>\(\dfrac{\Im(z)}{\Re(z)}\) est réel, donc \(Z\) est imaginaire pur. (Méthode 2, acceptée aussi : \(\bar Z\)<wbr>\({}=\dfrac{\bar z-z}{\bar z+z}\)<wbr>\({}=-Z\).)</p></div></div>
+
+<h4 class="ev-ex">Exercice 3 <span>(5 points)</span></h4></ex>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>a. \(Z\)<wbr>\({}=\dfrac{(x-1)+iy}{x+i(y+2)}\). On multiplie par le conjugué \(x-i(y+2)\) : le dénominateur devient \(x^2+(y+2)^2\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>Numérateur :</p>\[\begin{aligned}&x(x-1)+y(y+2)+i\big[xy-(x-1)(y+2)\big]\\&=x^2+y^2-x+2y+i(-2x+y+2)\end{aligned}\]</div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>\(\Re(Z)\)<wbr>\({}=\dfrac{x^2+y^2-x+2y}{x^2+(y+2)^2}\) et \(\Im(Z)\)<wbr>\({}=\dfrac{-2x+y+2}{x^2+(y+2)^2}\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>b. \(Z\) réel \(\iff-2x+y+2\)<wbr>\({}=0\)<wbr>\({}\iff y\)<wbr>\({}=2x-2\). C'est la droite d'équation \(y=2x-2\), privée du point d'affixe \(-2i\) (qui est sur cette droite mais où \(Z\) n'existe pas).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>c. \(Z\) imaginaire pur \(\iff x^2+y^2-x+2y=0\), avec \(z\neq-2i\).</p></div></div>
+
+<h4 class="ev-ex">Exercice 4 <span>(6 points)</span></h4></ex>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>a. \(z_{\vect{AB}}\)<wbr>\({}=z_B-z_A\)<wbr>\({}=-3+2i\) et \(z_{\vect{AC}}\)<wbr>\({}=z_C-z_A\)<wbr>\({}=6-4i\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1.5"><span>1,5 pts</span></label><div class="bar-body"><p>b. \(\dfrac{z_C-z_A}{z_B-z_A}\)<wbr>\({}=\dfrac{6-4i}{-3+2i}\)<wbr>\({}=\dfrac{-2(-3+2i)}{-3+2i}\)<wbr>\({}=-2\). Ce quotient est réel, donc \(A\), \(B\), \(C\) sont alignés.</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>c. \(z_I\)<wbr>\({}=\dfrac{z_B+z_C}{2}\)<wbr>\({}=\dfrac{(-1+3i)+(8-3i)}{2}\)<wbr>\({}=\dfrac72\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1.5"><span>1,5 pts</span></label><div class="bar-body"><p>d. \(ABED\) parallélogramme \(\iff\vect{AB}\)<wbr>\({}=\vect{DE}\)<wbr>\({}\iff z_B-z_A\)<wbr>\({}=z_E-z_D\), donc \(z_D\)<wbr>\({}=z_E-z_B+z_A\)<wbr>\({}=(4+5i)-(-1+3i)+(2+i)\)<wbr>\({}=7+3i\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>e. Avec la formule du barycentre :</p>\[z_G=\frac{2(2+i)+(-1+3i)+(4+5i)}{4}=\frac{7+10i}{4}=\frac74+\frac52i\]</div></div>
+<div class="ev-score"><p class="ev-note">Ta note : <strong>0</strong> / 20</p><p class="ev-avis"></p><button type="button" class="btn ghost ev-again">Recommencer l'évaluation</button></div></div>
+</div>
+</div></section>
+<section class="lesson" id="racines" data-part="Partie 2 · Les équations" data-title="Les racines carrées d&#x27;un complexe" hidden><header class="lhead"><p class="eyebrow">Partie 2 · Les équations · Étape 6<span class="meta">14 min</span></p><h2>Les racines carrées d'un complexe</h2></header><div class="lbody">
+<p class="objectif">Savoir trouver les deux complexes dont le carré est un nombre donné \(a+ib\) : c'est l'outil qui débloque les équations du second degré.</p>
+
+<h3>Le cas facile : un réel</h3>
+<p>Dans \(\C\), tout nombre a deux racines carrées, opposées l'une de l'autre. Pour un réel, on les trouve à vue :</p>
+<div class="retenir"><p class="lab">À connaître par cœur</p><p>Soit \(k\) un réel strictement positif.</p><ul>
+<li>Les racines carrées de \(k\) sont \(\sqrt k\) et \(-\sqrt k\).</li>
+<li>Les racines carrées de \(-k\) sont \(i\sqrt k\) et \(-i\sqrt k\), car \((i\sqrt k)^2=i^2k=-k\).</li>
+</ul></div>
+<p>Par exemple, les racines carrées de \(-12\) sont \(\pm i\sqrt{12}\)<wbr>\({}=\pm2i\sqrt3\).</p>
+
+<h3>Le cas général : la méthode du système</h3>
+<p>On cherche \(\delta=x+iy\) (\(x\), \(y\) réels) tel que \(\delta^2=a+ib\). Trois informations sont disponibles :</p>
+<ul>
+<li>\(\delta^2=x^2-y^2+2ixy\) : en identifiant, \(x^2-y^2=a\) et \(2xy=b\).</li>
+<li>Les modules sont égaux : \(|\delta|^2=|\delta^2|\), donc \(x^2+y^2=\sqrt{a^2+b^2}\).</li>
+</ul>
+<div class="retenir"><p class="lab">La méthode</p>
+\[\delta^2=a+ib\iff\begin{cases}x^2+y^2=\sqrt{a^2+b^2}\\x^2-y^2=a\\2xy=b\end{cases}\]
+<p>Les deux premières lignes donnent \(x^2\) et \(y^2\) (on les additionne, puis on les soustrait). La troisième donne le <strong>signe</strong> : si \(b&gt;0\), \(x\) et \(y\) ont le même signe ; si \(b&lt;0\), ils sont de signes contraires.</p>
+</div>
+
+<div class="copie"><p class="lab">Sur la copie</p>
+<p>Racines carrées de \(-5+12i\). On cherche \(\delta=x+iy\) tel que \(\delta^2=-5+12i\). \(\sqrt{(-5)^2+12^2}\)<wbr>\({}=\sqrt{169}\)<wbr>\({}=13\).</p>
+\[\begin{cases}x^2+y^2=13\\x^2-y^2=-5\\2xy=12\end{cases}\]
+<p>En additionnant les deux premières lignes : \(2x^2=8\), donc \(x^2=4\). En les soustrayant : \(2y^2=18\), donc \(y^2=9\).</p>
+<p>\(x=\pm2\), \(y=\pm3\), et \(2xy=12&gt;0\) : \(x\) et \(y\) ont le même signe.</p>
+<p><u>Les racines carrées de \(-5+12i\) sont \(2+3i\) et \(-2-3i\).</u></p>
+</div>
+<p>Vérification, à faire au brouillon : \((2+3i)^2\)<wbr>\({}=4+12i+9i^2\)<wbr>\({}=-5+12i\). Elle prend dix secondes et évite de fausser toute la suite.</p>
+
+<div class="prof"><p class="lab">Ce qui coûte des points</p><ul>
+<li>Oublier la ligne \(x^2+y^2=\sqrt{a^2+b^2}\). Sans elle, on tombe sur une équation de degré 4.</li>
+<li>Oublier d'utiliser le signe de \(b\) : on obtient alors quatre « solutions » dont deux sont fausses.</li>
+<li>Écrire \(\sqrt{-5+12i}\). Le symbole \(\sqrt{\ }\) est réservé aux réels positifs : on dit « une racine carrée de \(-5+12i\) ».</li>
+</ul></div>
+
+<h3 class="exos-h">Vérifie que tu as compris</h3>
+<article class="exo"><p class="exo-n">Exercice 1</p><div class="exo-q"><p>Détermine les racines carrées de : <strong>a.</strong> \(-16\) &nbsp; <strong>b.</strong> \(3-4i\) &nbsp; <strong>c.</strong> \(8+6i\)</p></div>
+<details class="tex2jax_ignore"><summary>Voir la correction</summary><div class="copie"><p class="lab">Correction</p><p>a. \(-16=16\,i^2=(4i)^2\) : les racines carrées sont \(4i\) et \(-4i\).</p>
+<p>b. \(\sqrt{3^2+(-4)^2}=5\). Système : \(x^2+y^2=5\), \(x^2-y^2=3\), \(2xy=-4\). Donc \(x^2=4\), \(y^2=1\), et \(x\), \(y\) de signes contraires. Les racines carrées sont \(2-i\) et \(-2+i\).</p>
+<p>c. \(\sqrt{8^2+6^2}=10\). Système : \(x^2+y^2=10\), \(x^2-y^2=8\), \(2xy=6\). Donc \(x^2=9\), \(y^2=1\), même signe. Les racines carrées sont \(3+i\) et \(-3-i\).</p></div></details></article>
+<article class="exo"><p class="exo-n">Exercice 2</p><div class="exo-q"><p>Résous dans \(\C\) l'équation \(z^2=-3-4i\).</p></div>
+<details class="tex2jax_ignore"><summary>Voir la correction</summary><div class="copie"><p class="lab">Correction</p><p>On cherche \(z=x+iy\). \(\sqrt{(-3)^2+(-4)^2}=5\).</p>
+<p>Système : \(x^2+y^2=5\), \(x^2-y^2=-3\), \(2xy=-4\). Donc \(2x^2=2\), \(x^2=1\) ; \(2y^2=8\), \(y^2=4\) ; et \(xy&lt;0\).</p>
+<p>Les solutions sont \(1-2i\) et \(-1+2i\).</p></div></details></article>
+<article class="exo"><p class="exo-n">Exercice 3</p><div class="exo-q"><p>Détermine les racines carrées de \(-18i\), puis de \(2i\).</p></div>
+<details class="tex2jax_ignore"><summary>Voir la correction</summary><div class="copie"><p class="lab">Correction</p><p>\(-18i\) : \(a=0\), \(b=-18\), \(\sqrt{0+18^2}=18\). Système : \(x^2+y^2=18\), \(x^2-y^2=0\), \(2xy=-18\). Donc \(x^2=y^2=9\) et \(xy&lt;0\) : les racines carrées sont \(3-3i\) et \(-3+3i\).</p>
+<p>\(2i\) : \(x^2+y^2=2\), \(x^2-y^2=0\), \(2xy=2\). Donc \(x^2=y^2=1\) et \(xy&gt;0\) : les racines carrées sont \(1+i\) et \(-1-i\). On retrouve \((1+i)^2=2i\).</p></div>
+<div class="prof"><p class="lab">Remarque</p><p>Quand \(a=0\), on a \(x^2=y^2\) : les deux parties ont la même valeur absolue. C'est un cas fréquent au bac.</p></div></details></article>
+</div></section>
+<section class="lesson" id="second-degre" data-part="Partie 2 · Les équations" data-title="L&#x27;équation du second degré" hidden><header class="lhead"><p class="eyebrow">Partie 2 · Les équations · Étape 7<span class="meta">14 min</span></p><h2>L'équation du second degré</h2></header><div class="lbody">
+<p class="objectif">Résoudre dans \(\C\) toute équation \(az^2+bz+c=0\), que ses coefficients soient réels ou complexes.</p>
+
+<h3>La formule</h3>
+<div class="retenir"><p class="lab">À connaître par cœur</p><p>Soit \(az^2+bz+c=0\) avec \(a\neq0\), et \(\Delta=b^2-4ac\).</p><ul>
+<li>Si \(\Delta=0\) : une solution double \(z_0=-\dfrac{b}{2a}\).</li>
+<li>Si \(\Delta\neq0\) : on cherche \(\delta\), une racine carrée de \(\Delta\) (\(\delta^2=\Delta\)). Les deux solutions sont</li>
+</ul>
+\[z_1=\frac{-b-\delta}{2a}\qquad z_2=\frac{-b+\delta}{2a}\]
+</div>
+<p>C'est la même formule qu'en Première. La seule différence : on ne cherche plus \(\sqrt\Delta\), on cherche <strong>une racine carrée</strong> \(\delta\) de \(\Delta\), avec l'étape précédente.</p>
+
+<h3>Coefficients réels et \(\Delta&lt;0\)</h3>
+<p>Si \(\Delta=-k\) avec \(k&gt;0\), on prend \(\delta=i\sqrt k\). Les solutions sont alors <strong>conjuguées</strong>.</p>
+<div class="copie"><p class="lab">Sur la copie</p><p>Résolution de \(z^2-2z+4=0\). \(\Delta\)<wbr>\({}=(-2)^2-4\times1\times4\)<wbr>\({}=-12\)<wbr>\({}=(2i\sqrt3)^2\).</p>
+<p>\(z_1\)<wbr>\({}=\dfrac{2-2i\sqrt3}{2}\)<wbr>\({}=1-i\sqrt3\) et \(z_2\)<wbr>\({}=\dfrac{2+2i\sqrt3}{2}\)<wbr>\({}=1+i\sqrt3\).</p>
+<p><u>\(S\)<wbr>\({}=\{1-i\sqrt3\,;\,1+i\sqrt3\}\).</u></p></div>
+<figure class="graphfig"><div class="graph" data-fig="second-degre" data-alt="Solutions de z² − 2z + c = 0 dans le plan complexe"></div><figcaption><span class="tag">À toi</span> Fais varier \(c\). Tant que \(\Delta&gt;0\), les deux solutions sont sur l'axe des réels. Quand \(\Delta\) devient négatif, elles quittent l'axe et restent symétriques par rapport à lui : elles sont conjuguées.</figcaption></figure>
+<div class="retenir"><p class="lab">À retenir</p><p>Si les coefficients \(a\), \(b\), \(c\) sont <strong>réels</strong> et \(\Delta&lt;0\), les deux solutions sont conjuguées : \(z_2=\bar z_1\). Cela permet de vérifier son résultat d'un coup d'œil.</p></div>
+
+<h3>Coefficients complexes</h3>
+<p>\(\Delta\) est alors un complexe quelconque : on cherche \(\delta\) avec le système.</p>
+<div class="copie"><p class="lab">Sur la copie</p><p>Résolution de \(z^2-(3+4i)z-1+5i=0\).</p>
+<p>\(\Delta\)<wbr>\({}=(3+4i)^2-4(-1+5i)\)<wbr>\({}=9+24i-16+4-20i\)<wbr>\({}=-3+4i\).</p>
+<p>On cherche \(\delta=x+iy\) tel que \(\delta^2=-3+4i\) : \(x^2+y^2=5\), \(x^2-y^2=-3\), \(2xy=4\). Donc \(x^2=1\), \(y^2=4\), même signe : \(\delta=1+2i\).</p>
+<p>\(z_1\)<wbr>\({}=\dfrac{3+4i-(1+2i)}{2}\)<wbr>\({}=\dfrac{2+2i}{2}\)<wbr>\({}=1+i\) et \(z_2\)<wbr>\({}=\dfrac{3+4i+(1+2i)}{2}\)<wbr>\({}=\dfrac{4+6i}{2}\)<wbr>\({}=2+3i\).</p>
+<p><u>\(S=\{1+i\,;\,2+3i\}\).</u></p></div>
+<div class="prof"><p class="lab">Le réflexe qui sauve</p><p>Vérifie avec la somme et le produit : pour \(z^2+bz+c=0\), on a \(z_1+z_2=-b\) et \(z_1z_2=c\). Ici \((1+i)+(2+3i)=3+4i\) et \((1+i)(2+3i)\)<wbr>\({}=2+3i+2i-3\)<wbr>\({}=-1+5i\). Les deux égalités sont vraies : les solutions sont justes.</p></div>
+
+<div class="prof"><p class="lab">Ce qui coûte des points</p><ul>
+<li>Écrire « \(\Delta&lt;0\) » quand \(\Delta\) n'est pas réel. Un complexe non réel n'a pas de signe.</li>
+<li>Dire « pas de solution » quand \(\Delta&lt;0\) : dans \(\C\), il y a toujours des solutions.</li>
+<li>Oublier de diviser <strong>toute</strong> l'expression \(-b\pm\delta\) par \(2a\).</li>
+</ul></div>
+
+<h3 class="exos-h">Vérifie que tu as compris</h3>
+<article class="exo"><p class="exo-n">Exercice 1</p><div class="exo-q"><p>Résous dans \(\C\) : <strong>a.</strong> \(z^2+2z+2=0\) &nbsp; <strong>b.</strong> \(z^2+z+1=0\) &nbsp; <strong>c.</strong> \(2z^2-2z+5=0\)</p></div>
+<details class="tex2jax_ignore"><summary>Voir la correction</summary><div class="copie"><p class="lab">Correction</p><p>a. \(\Delta=4-8=-4=(2i)^2\). \(z=\dfrac{-2\pm2i}{2}\) : \(S=\{-1-i\,;-1+i\}\).</p>
+<p>b. \(\Delta\)<wbr>\({}=1-4\)<wbr>\({}=-3\)<wbr>\({}=(i\sqrt3)^2\). \(S\)<wbr>\({}=\left\{-\dfrac12-\dfrac{\sqrt3}{2}i\,;-\dfrac12+\dfrac{\sqrt3}{2}i\right\}\).</p>
+<p>c. \(\Delta=4-40=-36=(6i)^2\). \(z=\dfrac{2\pm6i}{4}\) : \(S\)<wbr>\({}=\left\{\dfrac12-\dfrac32i\,;\dfrac12+\dfrac32i\right\}\).</p></div></details></article>
+<article class="exo"><p class="exo-n">Exercice 2</p><div class="exo-q"><p>Résous dans \(\C\) l'équation \(z^2-(5+i)z+8+i=0\).</p></div>
+<details class="tex2jax_ignore"><summary>Voir la correction</summary><div class="copie"><p class="lab">Correction</p><p>\(\Delta\)<wbr>\({}=(5+i)^2-4(8+i)\)<wbr>\({}=25+10i-1-32-4i\)<wbr>\({}=-8+6i\).</p>
+<p>\(\delta=x+iy\) avec \(\delta^2=-8+6i\) : \(x^2+y^2=\sqrt{64+36}=10\), \(x^2-y^2=-8\), \(2xy=6\). Donc \(x^2=1\), \(y^2=9\), même signe : \(\delta=1+3i\).</p>
+<p>\(z_1\)<wbr>\({}=\dfrac{5+i-(1+3i)}{2}\)<wbr>\({}=2-i\) et \(z_2\)<wbr>\({}=\dfrac{5+i+(1+3i)}{2}\)<wbr>\({}=3+2i\).</p>
+<p>Vérification : \((2-i)+(3+2i)=5+i\) et \((2-i)(3+2i)\)<wbr>\({}=6+4i-3i+2\)<wbr>\({}=8+i\).</p></div></details></article>
+<article class="exo"><p class="exo-n">Exercice 3</p><div class="exo-q"><p>Résous dans \(\C\) l'équation \(z^2-(1+3i)z-4+3i=0\).</p></div>
+<details class="tex2jax_ignore"><summary>Voir la correction</summary><div class="copie"><p class="lab">Correction</p><p>\(\Delta\)<wbr>\({}=(1+3i)^2-4(-4+3i)\)<wbr>\({}=1+6i-9+16-12i\)<wbr>\({}=8-6i\).</p>
+<p>\(\delta^2=8-6i\) : \(x^2+y^2=10\), \(x^2-y^2=8\), \(2xy=-6\). Donc \(x^2=9\), \(y^2=1\), signes contraires : \(\delta=3-i\).</p>
+<p>\(z_1\)<wbr>\({}=\dfrac{1+3i-(3-i)}{2}\)<wbr>\({}=\dfrac{-2+4i}{2}\)<wbr>\({}=-1+2i\) et \(z_2\)<wbr>\({}=\dfrac{1+3i+(3-i)}{2}\)<wbr>\({}=\dfrac{4+2i}{2}\)<wbr>\({}=2+i\).</p></div></details></article>
+</div></section>
+<section class="lesson" id="polynomes" data-part="Partie 2 · Les équations" data-title="Les équations de degré 3" hidden><header class="lhead"><p class="eyebrow">Partie 2 · Les équations · Étape 8<span class="meta">16 min</span></p><h2>Les équations de degré 3</h2></header><div class="lbody">
+<p class="objectif">Savoir résoudre une équation de degré 3 quand l'énoncé annonce une racine réelle ou imaginaire pure : trouver cette racine, factoriser, terminer.</p>
+
+<h3>La démarche en trois temps</h3>
+<ol class="methode">
+<li><strong>Trouver la racine annoncée.</strong> Si on te la donne (« montrer que \(2+i\) est solution »), tu calcules \(P(2+i)\) et tu trouves \(0\). Sinon, tu la cherches sous la forme \(z_0=iy\) (imaginaire pure) ou \(z_0=x\) (réelle).</li>
+<li><strong>Factoriser</strong> : \(P(z)=(z-z_0)(az^2+bz+c)\). On trouve \(a\), \(b\), \(c\) en développant et en identifiant les coefficients.</li>
+<li><strong>Résoudre</strong> \(az^2+bz+c=0\) avec l'étape précédente, puis donner les trois solutions.</li>
+</ol>
+
+<h3>Chercher une racine imaginaire pure</h3>
+<p>On pose \(z_0=iy\) avec \(y\) <strong>réel</strong>. On remplace dans \(P\), en utilisant \((iy)^2=-y^2\) et \((iy)^3=-iy^3\). L'équation \(P(iy)=0\) donne deux équations réelles : partie réelle nulle et partie imaginaire nulle. On cherche le \(y\) qui vérifie <strong>les deux</strong>.</p>
+<div class="copie"><p class="lab">Sur la copie : bac 2012</p><p>\((E)\) : \(z^3-2(1+i)z^2+2(1+2i)z-4i\)<wbr>\({}=0\) admet une racine imaginaire pure.</p>
+<p>Posons \(z_0=iy\), \(y\in\R\). \(P(iy)\)<wbr>\({}=-iy^3+2(1+i)y^2+2(1+2i)iy-4i\)<wbr>\({}=(2y^2-4y)+i(-y^3+2y^2+2y-4)\).</p>
+<p>\(P(iy)\)<wbr>\({}=0\)<wbr>\({}\iff\begin{cases}2y^2-4y=0\\-y^3+2y^2+2y-4=0\end{cases}\)</p>
+<p>La première équation donne \(y=0\) ou \(y=2\). Pour \(y=0\), la seconde vaut \(-4\neq0\). Pour \(y=2\) : \(-8+8+4-4=0\).</p>
+<p><u>La racine imaginaire pure est \(z_0=2i\).</u></p></div>
+
+<h3>Factoriser par identification</h3>
+<div class="copie"><p class="lab">Sur la copie (suite)</p><p>On cherche \(a\), \(b\) tels que \(P(z)=(z-2i)(z^2+az+b)\). En développant :</p>
+\[(z-2i)(z^2+az+b)=z^3+(a-2i)z^2+(b-2ia)z-2ib\]
+<p>Par identification avec \(z^3-(2+2i)z^2+(2+4i)z-4i\) :</p>
+<p>\(a-2i=-2-2i\), donc \(a=-2\) ; \(-2ib=-4i\), donc \(b=2\). Contrôle : \(b-2ia=2+4i\). ✔</p>
+<p>Donc \(P(z)=(z-2i)(z^2-2z+2)\).</p>
+<p>\(z^2-2z+2=0\) : \(\Delta=4-8=-4=(2i)^2\), \(z\)<wbr>\({}=\dfrac{2\pm2i}{2}\)<wbr>\({}=1\pm i\).</p>
+<p><u>\(S\)<wbr>\({}=\{2i\,;\,1+i\,;\,1-i\}\).</u></p></div>
+<div class="retenir"><p class="lab">À retenir</p><ul>
+<li>Le coefficient de \(z^3\) et le terme constant donnent souvent \(a\) et \(b\) directement. Le coefficient restant sert de <strong>contrôle</strong> : s'il ne colle pas, il y a une erreur.</li>
+<li>On peut aussi factoriser avec le <strong>tableau de Horner</strong>. Les deux méthodes sont acceptées, choisis celle que tu maîtrises.</li>
+<li>Une racine <strong>réelle</strong> se cherche de la même façon, avec \(z_0=x\) réel : partie réelle et partie imaginaire de \(P(x)\) doivent être nulles.</li>
+</ul></div>
+
+<div class="prof"><p class="lab">Ce qui coûte des points</p><ul>
+<li>Ne résoudre qu'une des deux équations réelles. Il faut que le \(y\) trouvé vérifie <strong>les deux</strong>, sinon ce n'est pas une racine.</li>
+<li>Oublier \(z_0\) dans l'ensemble des solutions final.</li>
+<li>Se tromper de signe dans \((iy)^3=i^3y^3=-iy^3\).</li>
+</ul></div>
+
+<h3 class="exos-h">Vérifie que tu as compris</h3>
+<article class="exo"><p class="exo-n">Exercice 1</p><div class="exo-q"><p><strong>Bac 2015.</strong> Soit \(P(z)=z^3+3z^2-3z-5-20i\).</p><p><strong>a.</strong> Montre que \(2+i\) est une racine de \(P\). <strong>b.</strong> Détermine \(a\) et \(b\) tels que \(P(z)=(z-2-i)(z^2+az+b)\). <strong>c.</strong> Résous \(P(z)=0\).</p></div>
+<details class="tex2jax_ignore"><summary>Voir la correction</summary><div class="copie"><p class="lab">Correction</p><p>a. \((2+i)^2=3+4i\) et \((2+i)^3\)<wbr>\({}=(3+4i)(2+i)\)<wbr>\({}=2+11i\).</p>
+<p>\(P(2+i)\)<wbr>\({}=(2+11i)+3(3+4i)-3(2+i)-5-20i\).</p>
+<p>Partie réelle : \(2+9-6-5=0\). Partie imaginaire : \(11+12-3-20=0\). Donc \(P(2+i)=0\).</p>
+<p>b. En développant :</p>
+\[(z-2-i)(z^2+az+b)=z^3+(a-2-i)z^2+\big(b-(2+i)a\big)z-(2+i)b\]
+<p>\(a-2-i=3\), donc \(a=5+i\). \(-(2+i)b=-5-20i\), donc \(b\)<wbr>\({}=\dfrac{5+20i}{2+i}\)<wbr>\({}=\dfrac{(5+20i)(2-i)}{5}\)<wbr>\({}=\dfrac{30+35i}{5}\)<wbr>\({}=6+7i\).</p>
+<p>Contrôle : \(b-(2+i)a=6+7i-(9+7i)=-3\). ✔</p>
+<p>c. \(z^2+(5+i)z+6+7i=0\) : \(\Delta\)<wbr>\({}=(5+i)^2-4(6+7i)\)<wbr>\({}=24+10i-24-28i\)<wbr>\({}=-18i\). À l'étape 5, on a trouvé \(\delta=3-3i\).</p>
+<p>\(z\)<wbr>\({}=\dfrac{-5-i-(3-3i)}{2}\)<wbr>\({}=-4+i\) ou \(z\)<wbr>\({}=\dfrac{-5-i+(3-3i)}{2}\)<wbr>\({}=-1-2i\).</p>
+<p>\(S\)<wbr>\({}=\{2+i\,;-1-2i\,;-4+i\}\).</p></div></details></article>
+<article class="exo"><p class="exo-n">Exercice 2</p><div class="exo-q"><p><strong>Bac 2007.</strong> \((E)\) : \(z^3-(3+2i)z^2+(1+4i)z+1-2i\)<wbr>\({}=0\).</p><p><strong>a.</strong> Détermine la solution réelle de \((E)\). <strong>b.</strong> Montre que \(i\) est solution. <strong>c.</strong> Détermine la troisième solution.</p></div>
+<details class="tex2jax_ignore"><summary>Voir la correction</summary><div class="copie"><p class="lab">Correction</p><p>a. Soit \(x\) réel. En regroupant :</p>
+\[P(x)=(x^3-3x^2+x+1)+i(-2x^2+4x-2)\]
+<p>Partie imaginaire : \(-2(x^2-2x+1)\)<wbr>\({}=-2(x-1)^2\)<wbr>\({}=0\)<wbr>\({}\iff x\)<wbr>\({}=1\). Partie réelle en \(1\) : \(1-3+1+1=0\). ✔ La solution réelle est \(1\).</p>
+<p>b. \(i^3=-i\) et \(i^2=-1\) : \(P(i)\)<wbr>\({}=-i+(3+2i)+(1+4i)i+1-2i\)<wbr>\({}=-i+3+2i+i-4+1-2i\)<wbr>\({}=0\).</p>
+<p>c. On a \(P(z)=(z-1)(z-i)(z-c)\). En développant, le coefficient de \(z^2\) est \(-(1+i+c)\). Par identification, \(1+i+c=3+2i\), donc \(c=2+i\).</p>
+<p>\(S=\{1\,;\,i\,;\,2+i\}\).</p></div>
+<div class="prof"><p class="lab">Remarque</p><p>Quand on connaît deux racines d'un polynôme unitaire de degré 3, la troisième s'obtient sans discriminant, avec le coefficient de \(z^2\).</p></div></details></article>
+<article class="exo"><p class="exo-n">Exercice 3</p><div class="exo-q"><p>Soit</p>\[P(z)=z^3-2(1+i)z^2-2(1-4i)z+4(2+i)\]<p><strong>a.</strong> Montre que \(P\) admet une racine imaginaire pure \(z_0\). <strong>b.</strong> Factorise \(P(z)\) et résous \(P(z)=0\).</p></div>
+<details class="tex2jax_ignore"><summary>Voir la correction</summary><div class="copie"><p class="lab">Correction</p><p>a. Posons \(z_0=iy\), \(y\) réel :</p>
+\[P(iy)=-iy^3+2(1+i)y^2-2(1-4i)iy+8+4i\]
+<p>Or \(-2(1-4i)iy\)<wbr>\({}=-2iy+8i^2y\)<wbr>\({}=-8y-2iy\). Donc :</p>
+\[P(iy)=(2y^2-8y+8)+i(-y^3+2y^2-2y+4)\]
+<p>Partie réelle : \(2(y-2)^2=0\iff y=2\). Partie imaginaire en \(2\) : \(-8+8-4+4=0\). ✔ Donc \(z_0=2i\).</p>
+<p>b. \((z-2i)(z^2+az+b)\)<wbr>\({}=z^3+(a-2i)z^2+(b-2ia)z-2ib\).</p>
+<p>\(a-2i=-2-2i\), donc \(a=-2\). \(-2ib=8+4i\), donc \(b\)<wbr>\({}=\dfrac{8+4i}{-2i}\)<wbr>\({}=\dfrac{(8+4i)\,i}{2}\)<wbr>\({}=-2+4i\). Contrôle : \(b-2ia=-2+8i=-2(1-4i)\). ✔</p>
+<p>\(z^2-2z-2+4i=0\) : \(\Delta\)<wbr>\({}=4-4(-2+4i)\)<wbr>\({}=12-16i\). \(\delta^2=12-16i\) : \(x^2+y^2=20\), \(x^2-y^2=12\), \(xy&lt;0\), donc \(\delta=4-2i\).</p>
+<p>\(z\)<wbr>\({}=\dfrac{2-(4-2i)}{2}\)<wbr>\({}=-1+i\) ou \(z\)<wbr>\({}=\dfrac{2+(4-2i)}{2}\)<wbr>\({}=3-i\).</p>
+<p>\(S=\{2i\,;-1+i\,;\,3-i\}\).</p></div></details></article>
+</div></section>
+<section class="lesson" id="eval-p2" data-part="Partie 2 · Les équations" data-title="Évaluation de la partie 2" hidden><header class="lhead"><p class="eyebrow">Partie 2 · Les équations · Étape 9<span class="meta">50 min</span></p><h2>Évaluation de la partie 2</h2></header><div class="lbody">
+<p class="objectif">Vérifier que toute la partie 2 est acquise : racines carrées d'un complexe, équations du second degré à coefficients réels et complexes, équation de degré 3 avec une racine imaginaire pure.</p>
+
+<div class="eval" data-min="50" data-id="p2"><div class="ev-intro"><p class="ev-meta"><span>Durée : <strong>50 minutes</strong></span><span>Noté sur <strong>20</strong></span></p><ul><li>Prépare une feuille, un stylo et un brouillon. Pas de calculatrice.</li><li>Le sujet s'affiche quand tu lances le chronomètre. Rédige comme le jour du devoir.</li><li>À la fin du temps, ou quand tu cliques sur « J'ai terminé », le corrigé et le barème apparaissent. Tu te notes toi-même, honnêtement.</li></ul><div class="ev-actions"><button type="button" class="btn ev-go">Commencer l'évaluation</button></div><p class="ev-best" hidden></p></div><div class="ev-bar" hidden><p class="ev-t" aria-live="off">50:00</p><div class="ev-btns"><button type="button" class="btn ghost ev-pause">Pause</button><button type="button" class="btn ev-end">J'ai terminé</button></div></div>
+<div class="ev-sujet tex2jax_ignore" hidden>
+<h4 class="ev-ex">Exercice 1 <span>(5 points)</span></h4></ex>
+<p>Détermine les racines carrées de : <strong>a.</strong> \(-9\) &nbsp; <strong>b.</strong> \(5+12i\) &nbsp; <strong>c.</strong> \(-8-6i\)</p>
+
+<h4 class="ev-ex">Exercice 2 <span>(6 points)</span></h4></ex>
+<p>Résous dans \(\C\) les équations :</p>
+<p><strong>a.</strong> \(z^2-6z+13=0\) &nbsp;&nbsp; <strong>b.</strong> \(z^2-(4+i)z+5+5i=0\)</p>
+
+<h4 class="ev-ex">Exercice 3 <span>(9 points)</span></h4></ex>
+<p>On considère le polynôme \(P\) défini sur \(\C\) par :</p>
+\[P(z)=z^3-(4+3i)z^2+(5+12i)z-15i\]
+<p><strong>a.</strong> Montre que l'équation \(P(z)=0\) admet une solution imaginaire pure \(z_0\), que l'on déterminera.</p>
+<p><strong>b.</strong> Détermine les complexes \(a\) et \(b\) tels que, pour tout \(z\), \(P(z)=(z-z_0)(z^2+az+b)\).</p>
+<p><strong>c.</strong> Résous dans \(\C\) l'équation \(P(z)=0\).</p>
+<p><strong>d.</strong> Vérifie que la somme des trois solutions est égale à \(4+3i\).</p>
+</div>
+
+<div class="ev-cor tex2jax_ignore" hidden><h3>Corrigé et barème</h3><p class="ev-help">Compare ta copie ligne à ligne. Coche une case seulement si ta réponse est juste <strong>et justifiée</strong>.</p>
+<h4 class="ev-ex">Exercice 1 <span>(5 points)</span></h4></ex>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>a. \(-9=9i^2=(3i)^2\) : les racines carrées de \(-9\) sont \(3i\) et \(-3i\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>b. On cherche \(\delta=x+iy\) avec \(\delta^2=5+12i\) : \(x^2+y^2\)<wbr>\({}=\sqrt{25+144}\)<wbr>\({}=13\), \(x^2-y^2=5\), \(2xy=12\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>Donc \(x^2=9\), \(y^2=4\), \(x\) et \(y\) de même signe : les racines carrées sont \(3+2i\) et \(-3-2i\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>c. \(x^2+y^2=\sqrt{64+36}=10\), \(x^2-y^2=-8\), \(2xy=-6\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>Donc \(x^2=1\), \(y^2=9\), \(x\) et \(y\) de signes contraires : les racines carrées sont \(1-3i\) et \(-1+3i\).</p></div></div>
+
+<h4 class="ev-ex">Exercice 2 <span>(6 points)</span></h4></ex>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>a. \(\Delta=36-52=-16=(4i)^2\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>\(z=\dfrac{6\pm4i}{2}\) : \(S=\{3-2i\,;\,3+2i\}\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>b. \(\Delta\)<wbr>\({}=(4+i)^2-4(5+5i)\)<wbr>\({}=15+8i-20-20i\)<wbr>\({}=-5-12i\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>\(\delta^2=-5-12i\) : \(x^2+y^2=13\), \(x^2-y^2=-5\), \(xy&lt;0\). Donc \(x^2=4\), \(y^2=9\) : \(\delta=2-3i\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1.5"><span>1,5 pts</span></label><div class="bar-body"><p>\(z_1\)<wbr>\({}=\dfrac{4+i-(2-3i)}{2}\)<wbr>\({}=\dfrac{2+4i}{2}\)<wbr>\({}=1+2i\) et \(z_2\)<wbr>\({}=\dfrac{4+i+(2-3i)}{2}\)<wbr>\({}=\dfrac{6-2i}{2}\)<wbr>\({}=3-i\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="0.5"><span>0,5 pt</span></label><div class="bar-body"><p>\(S=\{1+2i\,;\,3-i\}\).</p></div></div>
+
+<h4 class="ev-ex">Exercice 3 <span>(9 points)</span></h4></ex>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>a. Posons \(z_0=iy\), \(y\) réel. Avec \((iy)^2=-y^2\) et \((iy)^3=-iy^3\) :</p>
+\[P(iy)=(4y^2-12y)+i(-y^3+3y^2+5y-15)\]</div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>\(P(iy)=0\iff4y^2-12y=0\) et \(-y^3+3y^2+5y-15=0\). La première donne \(y=0\) ou \(y=3\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>Pour \(y=0\), la seconde vaut \(-15\neq0\). Pour \(y=3\) : \(-27+27+15-15=0\). Donc \(z_0=3i\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>b. En développant :</p>\[(z-3i)(z^2+az+b)=z^3+(a-3i)z^2+(b-3ia)z-3ib\]</div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>Par identification : \(a-3i=-4-3i\), donc \(a=-4\) ; \(-3ib=-15i\), donc \(b=5\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>Contrôle : \(b-3ia=5+12i\). ✔ Donc \(P(z)=(z-3i)(z^2-4z+5)\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>c. \(z^2-4z+5=0\) : \(\Delta=16-20=-4=(2i)^2\), \(z\)<wbr>\({}=\dfrac{4\pm2i}{2}\)<wbr>\({}=2\pm i\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>\(S\)<wbr>\({}=\{3i\,;\,2+i\,;\,2-i\}\).</p></div></div>
+<div class="bar"><label class="bar-chk"><input type="checkbox" data-p="1"><span>1 pt</span></label><div class="bar-body"><p>d. \(3i+(2+i)+(2-i)=4+3i\). ✔</p></div></div>
+<div class="ev-score"><p class="ev-note">Ta note : <strong>0</strong> / 20</p><p class="ev-avis"></p><button type="button" class="btn ghost ev-again">Recommencer l'évaluation</button></div></div>
+</div>
+</div></section>
+    <div class="pager">
+      <a class="btn ghost" id="prev" href="#accueil">← Étape précédente</a>
+      <div class="right">
+        <p class="done-note" id="done-note" hidden>Étape validée</p>
+        <a class="btn" id="next" href="#carte">J'ai compris, étape suivante →</a>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']],
+         macros: { R: '\\mathbb{R}', N: '\\mathbb{N}', C: '\\mathbb{C}', Re: '\\operatorname{Re}', Im: '\\operatorname{Im}', vect: ['\\overrightarrow{#1}', 1] } },
+  svg: { fontCache: 'global' },
+  startup: { typeset: false }
+};
+</script>
+<script src="assets/mathjax/tex-svg.js"></script>
+<script>
+/* Graphiques interactifs du plan complexe : un petit traceur sur canvas (repère orthonormé),
+   une configuration par figure, un ou plusieurs curseurs. */
+(function(){
+  function fr(v, d){
+    if (Math.abs(v) < 1e-9) v = 0;
+    var s = (+v.toFixed(d == null ? 2 : d)).toString().replace('.', ',');
+    return s.replace('-', '−');
+  }
+  // écriture algébrique a + ib lisible
+  function cx(a, b, d){
+    if (Math.abs(a) < 1e-9) a = 0; if (Math.abs(b) < 1e-9) b = 0;
+    var A = fr(a, d), B = fr(Math.abs(b), d);
+    var ib = (B === '1' ? 'i' : B + 'i');
+    if (b === 0) return A;
+    if (a === 0) return (b < 0 ? '−' : '') + ib;
+    return A + (b < 0 ? ' − ' : ' + ') + ib;
+  }
+
+  var FIG = {
+    plan: {
+      win: [-5, 5, -4, 4],
+      sliders: [
+        { k: 'a', label: 'Partie réelle a', min: -4, max: 4, step: 0.5, init: 3 },
+        { k: 'b', label: 'Partie imaginaire b', min: -3.5, max: 3.5, step: 0.5, init: 2 }
+      ],
+      draw: function(g, v){
+        var a = v.a, b = v.b;
+        g.seg(a, 0, a, b, 'muted', true); g.seg(0, b, a, b, 'muted', true);
+        g.seg(a, 0, a, -b, 'muted', true);
+        g.arrow(0, 0, a, b, 'pen');
+        g.point(a, b, 'pen'); g.label('M(z)', a, b, 'pen');
+        g.point(a, -b, 'rouge'); g.label('M′(z̄)', a, -b, 'rouge');
+        g.point(-a, -b, 'prof'); g.label('N(−z)', -a, -b, 'prof');
+      },
+      read: function(v){
+        return 'z = ' + cx(v.a, v.b) + '   ;   Re(z) = ' + fr(v.a) + '   ;   Im(z) = ' + fr(v.b)
+          + '\nz̄ = ' + cx(v.a, -v.b) + ' (symétrique par rapport à l’axe des réels)   ;   −z = ' + cx(-v.a, -v.b) + ' (symétrique par rapport à O)';
+      }
+    },
+    puissances: {
+      win: [-1.8, 1.8, -1.5, 1.5],
+      sliders: [{ k: 'n', label: 'Exposant n', min: 0, max: 12, step: 1, init: 0 }],
+      P: [[1, 0], [0, 1], [-1, 0], [0, -1]],
+      draw: function(g, v){
+        var n = v.n, P = this.P, names = ['1', 'i', '−1', '−i'];
+        for (var k = 0; k < 4; k++){ g.point(P[k][0], P[k][1], 'muted', true); g.label(names[k], P[k][0], P[k][1], 'muted'); }
+        for (var j = 0; j < n; j++){ var p = P[j % 4], q = P[(j + 1) % 4]; g.seg(p[0], p[1], q[0], q[1], 'line'); }
+        var r = P[n % 4];
+        g.arrow(0, 0, r[0], r[1], 'pen'); g.point(r[0], r[1], 'rouge');
+      },
+      read: function(v){
+        var n = v.n, names = ['1', 'i', '−1', '−i'];
+        return 'n = ' + n + ' : n = 4 × ' + Math.floor(n / 4) + ' + ' + (n % 4) + ', donc iⁿ = i' + toSup(n % 4) + ' = ' + names[n % 4];
+      }
+    },
+    vecteur: {
+      win: [-2, 6, -2, 5],
+      sliders: [
+        { k: 'a', label: 'Re(zB)', min: -1.5, max: 5.5, step: 0.5, init: 4 },
+        { k: 'b', label: 'Im(zB)', min: -1.5, max: 4.5, step: 0.5, init: 3 }
+      ],
+      draw: function(g, v){
+        var xa = 1, ya = -1, xb = v.a, yb = v.b, xi = (xa + xb) / 2, yi = (ya + yb) / 2;
+        g.arrow(0, 0, xb - xa, yb - ya, 'prof', true);
+        g.arrow(xa, ya, xb, yb, 'pen');
+        g.point(xa, ya, 'ink'); g.label('A', xa, ya, 'ink');
+        g.point(xb, yb, 'ink'); g.label('B', xb, yb, 'ink');
+        g.point(xi, yi, 'rouge'); g.label('I', xi, yi, 'rouge', (xb - xa) * (yb - ya) >= 0 ? 1 : -1, (xb - xa) * (yb - ya) >= 0 ? 1 : 1);
+      },
+      read: function(v){
+        var dx = v.a - 1, dy = v.b + 1;
+        return 'zA = 1 − i   ;   zB = ' + cx(v.a, v.b)
+          + '\nAffixe de AB→ : zB − zA = ' + cx(dx, dy) + '   ;   AB = |zB − zA| = ' + fr(Math.sqrt(dx*dx + dy*dy))
+          + '\nMilieu I de [AB] : (zA + zB)/2 = ' + cx((1 + v.a) / 2, (v.b - 1) / 2);
+      }
+    },
+    'second-degre': {
+      win: [-2.5, 4.5, -3, 3],
+      sliders: [{ k: 'c', label: 'Coefficient c', min: -3, max: 6, step: 0.25, init: 5 }],
+      roots: function(c){
+        var D = 4 - 4 * c;
+        if (D >= 0){ var s = Math.sqrt(D) / 2; return { D: D, r: [[1 - s, 0], [1 + s, 0]] }; }
+        var t = Math.sqrt(-D) / 2; return { D: D, r: [[1, -t], [1, t]] };
+      },
+      draw: function(g, v){
+        var R = this.roots(v.c);
+        g.vline(1, 'line', true);
+        g.point(R.r[0][0], R.r[0][1], 'rouge'); g.point(R.r[1][0], R.r[1][1], 'pen');
+        if (R.D < 0){ g.label('z₁', R.r[1][0], R.r[1][1], 'pen'); g.label('z₂', R.r[0][0], R.r[0][1], 'rouge'); }
+      },
+      read: function(v){
+        var R = this.roots(v.c), D = R.D;
+        var s = 'z² − 2z + ' + fr(v.c) + ' = 0   ;   Δ = 4 − 4c = ' + fr(D) + '\n';
+        if (D > 0) return s + 'Δ > 0 : deux solutions réelles ' + fr(R.r[0][0]) + ' et ' + fr(R.r[1][0]) + ' (sur l’axe des réels).';
+        if (D === 0) return s + 'Δ = 0 : une solution double z = 1.';
+        return s + 'Δ < 0 : deux solutions conjuguées z₁ = ' + cx(1, R.r[1][1]) + ' et z₂ = ' + cx(1, R.r[0][1]) + ', symétriques par rapport à l’axe des réels.';
+      }
+    }
+  };
+  function toSup(n){ return '⁰¹²³'.charAt(n); }
+
+  function niceStep(span){
+    var raw = span / 7, p = Math.pow(10, Math.floor(Math.log10(raw))), r = raw / p;
+    return (r < 1.5 ? 1 : r < 3.5 ? 2 : r < 7.5 ? 5 : 10) * p;
+  }
+  function tickLabel(v, step){
+    var d = step >= 1 ? 0 : Math.min(4, Math.ceil(-Math.log10(step)));
+    return v.toFixed(d).replace('.', ',').replace('-', '−');
+  }
+
+  function Graph(el){
+    var self = this, cfg = FIG[el.dataset.fig];
+    if (!cfg) return;
+    this.el = el; this.cfg = cfg;
+    var html = '<canvas class="g-cv" role="img" aria-label="' + (el.dataset.alt || 'Graphique') + '"></canvas>';
+    cfg.sliders.forEach(function(s){
+      var id = 'g-' + el.dataset.fig + '-' + s.k;
+      html += '<div class="g-ctl"><label for="' + id + '">' + s.label + '</label>'
+        + '<input type="range" id="' + id + '" data-k="' + s.k + '" min="' + s.min + '" max="' + s.max + '" step="' + s.step + '" value="' + s.init + '"></div>';
+    });
+    html += '<p class="g-read" aria-live="polite"></p>';
+    el.innerHTML = html;
+    this.cv = el.querySelector('canvas'); this.inps = el.querySelectorAll('input'); this.out = el.querySelector('.g-read');
+    this.inps.forEach(function(i){ i.addEventListener('input', function(){ self.render(); }); });
+  }
+  Graph.prototype.render = function(){
+    var cv = this.cv, W = cv.clientWidth, H = cv.clientHeight;
+    if (!W || !H) return;
+    var dpr = window.devicePixelRatio || 1;
+    if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)){ cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+    var c = cv.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, W, H);
+    var cs = getComputedStyle(document.documentElement), col = {};
+    ['ink','muted','line','grid','pen','rouge','prof','surface','pen-bg','rouge-bg'].forEach(function(k){ col[k] = cs.getPropertyValue('--' + k).trim() || '#888'; });
+    var v = {}; this.inps.forEach(function(i){ v[i.dataset.k] = parseFloat(i.value); });
+    var cfg = this.cfg, w = cfg.win, x0 = w[0], x1 = w[1], y0 = w[2], y1 = w[3];
+    var pl = 30, pr = 10, pt = 10, pb = 22, iw = W - pl - pr, ih = H - pt - pb;
+    // repère orthonormé : on élargit la fenêtre dans la direction qui a de la place
+    var k = Math.min(iw / (x1 - x0), ih / (y1 - y0));
+    var cxm = (x0 + x1) / 2, cym = (y0 + y1) / 2;
+    x0 = cxm - iw / k / 2; x1 = cxm + iw / k / 2; y0 = cym - ih / k / 2; y1 = cym + ih / k / 2;
+    function X(x){ return pl + (x - x0) * k; }
+    function Y(y){ return H - pb - (y - y0) * k; }
+    var font = cs.getPropertyValue('--f-body') || 'sans-serif';
+    c.font = '12px ' + font; c.lineJoin = 'round'; c.lineCap = 'round';
+
+    var g = {
+      vline: function(x, kk, dash){ c.save(); c.strokeStyle = col[kk]; c.lineWidth = 1.5; if (dash) c.setLineDash([6, 5]); c.beginPath(); c.moveTo(X(x), pt); c.lineTo(X(x), H - pb); c.stroke(); c.restore(); },
+      seg: function(xa, ya, xb, yb, kk, dash){ c.save(); c.strokeStyle = col[kk]; c.lineWidth = dash ? 1.3 : 2; if (dash) c.setLineDash([5, 4]); c.beginPath(); c.moveTo(X(xa), Y(ya)); c.lineTo(X(xb), Y(yb)); c.stroke(); c.restore(); },
+      arrow: function(xa, ya, xb, yb, kk, dash){
+        var ax = X(xa), ay = Y(ya), bx = X(xb), by = Y(yb), L = Math.hypot(bx - ax, by - ay);
+        if (L < 2) return;
+        var ux = (bx - ax) / L, uy = (by - ay) / L, h = Math.min(11, L / 2);
+        c.save(); c.strokeStyle = col[kk]; c.fillStyle = col[kk]; c.lineWidth = 2.2; if (dash) c.setLineDash([6, 4]);
+        c.beginPath(); c.moveTo(ax, ay); c.lineTo(bx - ux * h * 0.8, by - uy * h * 0.8); c.stroke(); c.setLineDash([]);
+        c.beginPath(); c.moveTo(bx, by); c.lineTo(bx - ux * h - uy * h * 0.45, by - uy * h + ux * h * 0.45); c.lineTo(bx - ux * h + uy * h * 0.45, by - uy * h - ux * h * 0.45); c.closePath(); c.fill(); c.restore();
+      },
+      point: function(x, y, kk, open){
+        c.save(); c.beginPath(); c.arc(X(x), Y(y), 5, 0, 6.2832);
+        c.fillStyle = open ? col.surface : col[kk]; c.fill(); c.lineWidth = 2; c.strokeStyle = col[kk]; c.stroke(); c.restore();
+      },
+      // étiquette placée à l'extérieur, du côté opposé à l'origine
+      label: function(s, x, y, kk, fdx, fdy){
+        var px = X(x), py = Y(y), dx = fdx || (x >= 0 ? 1 : -1), dy = fdy || (y >= 0 ? -1 : 1);
+        c.save(); c.fillStyle = col[kk]; c.font = '700 13px ' + font;
+        c.textAlign = dx > 0 ? 'left' : 'right'; c.textBaseline = dy < 0 ? 'bottom' : 'top';
+        c.fillText(s, px + dx * 7, py + dy * 5); c.restore();
+      }
+    };
+
+    // fond, quadrillage, axes
+    c.fillStyle = col.surface; c.fillRect(0, 0, W, H);
+    var st = niceStep(Math.min(x1 - x0, y1 - y0) * 7 / 6), t;
+    c.strokeStyle = col.grid; c.lineWidth = 1; c.fillStyle = col.muted;
+    c.textAlign = 'center'; c.textBaseline = 'top';
+    for (t = Math.ceil(x0 / st) * st; t <= x1 + 1e-9; t += st){
+      c.beginPath(); c.moveTo(X(t), pt); c.lineTo(X(t), H - pb); c.stroke();
+      c.fillText(tickLabel(Math.abs(t) < 1e-9 ? 0 : t, st), X(t), H - pb + 5);
+    }
+    c.textAlign = 'right'; c.textBaseline = 'middle';
+    for (t = Math.ceil(y0 / st) * st; t <= y1 + 1e-9; t += st){
+      c.beginPath(); c.moveTo(pl, Y(t)); c.lineTo(W - pr, Y(t)); c.stroke();
+      if (Math.abs(t) > 1e-9) c.fillText(tickLabel(t, st), pl - 5, Y(t));
+    }
+    c.textBaseline = 'alphabetic';
+    c.strokeStyle = col.muted; c.lineWidth = 1.4;
+    c.beginPath(); c.moveTo(pl, Y(0)); c.lineTo(W - pr, Y(0)); c.stroke();
+    c.beginPath(); c.moveTo(X(0), pt); c.lineTo(X(0), H - pb); c.stroke();
+    c.fillStyle = col.muted; c.font = '600 12px ' + font; c.textAlign = 'right';
+    c.fillText('axe des réels', W - pr - 2, Y(0) - 6);
+    c.textAlign = 'left'; c.fillText('axe des imaginaires purs', X(0) + 6, pt + 12);
+
+    cfg.draw(g, v);
+    this.out.textContent = cfg.read(v);
+  };
+
+  var all = [];
+  document.querySelectorAll('.graph').forEach(function(el){ var g = new Graph(el); if (g.cfg) all.push(g); });
+  function redraw(){ all.forEach(function(g){ g.render(); }); }
+  window.redrawGraphs = redraw;
+  window.addEventListener('resize', redraw);
+  try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', redraw); } catch(e){}
+  try { new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] }); } catch(e){}
+})();
+
+</script>
+<script>
+(function(){
+  var lessons = Array.prototype.slice.call(document.querySelectorAll('.lesson'));
+  var ids = lessons.map(function(s){ return s.id; });
+  var KEY = 'parcours-nombres-complexes-etapes';
+  var done = {};
+  try { done = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch(e){ done = {}; }
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(done)); } catch(e){} }
+
+  // ----- sommaire -----
+  var nav = document.getElementById('nav'), html = '', part = null, n = 0;
+  lessons.forEach(function(s){
+    var p = s.dataset.part || '';
+    if (p !== part){ if (part !== null) html += '</ol>'; html += (p ? '<p class="nav-part">' + p + '</p>' : '') + '<ol class="nav-list">'; part = p; }
+    var num = s.id === 'accueil' ? 'i' : String(++n);
+    html += '<li><a href="#' + s.id + '" data-id="' + s.id + '"><span class="nav-n">' + num + '</span><span>' + s.dataset.title + '</span></a></li>';
+  });
+  nav.innerHTML = html + '</ol>';
+  var links = Array.prototype.slice.call(nav.querySelectorAll('a'));
+  var total = ids.length - 1;
+
+  function refreshProgress(){
+    var c = 0;
+    links.forEach(function(a){
+      var d = !!done[a.dataset.id];
+      a.classList.toggle('done', d);
+      if (d && a.dataset.id !== 'accueil') { c++; a.querySelector('.nav-n').textContent = '✓'; }
+    });
+    document.getElementById('prog-fill').style.width = (100 * c / total) + '%';
+    document.getElementById('prog-txt').textContent = c + ' étape' + (c > 1 ? 's' : '') + ' validée' + (c > 1 ? 's' : '') + ' sur ' + total;
+    document.getElementById('mini-prog').textContent = c + ' / ' + total;
+  }
+
+  // ----- formules : rendues à l'ouverture de l'étape -----
+  var typeset = {};
+  function renderMath(el){
+    if (typeset[el.id] || !window.MathJax || !MathJax.typesetPromise) return;
+    typeset[el.id] = true;
+    MathJax.typesetPromise([el]).catch(function(){ typeset[el.id] = false; });
+  }
+
+  var side = document.getElementById('side'), scrim = document.getElementById('scrim'), menuBtn = document.getElementById('menu-btn');
+  function closeMenu(){ side.classList.remove('open'); scrim.hidden = true; menuBtn.setAttribute('aria-expanded','false'); }
+  menuBtn.addEventListener('click', function(){
+    var o = !side.classList.contains('open');
+    side.classList.toggle('open', o); scrim.hidden = !o; menuBtn.setAttribute('aria-expanded', String(o));
+  });
+  scrim.addEventListener('click', closeMenu);
+
+  var prev = document.getElementById('prev'), next = document.getElementById('next'), doneNote = document.getElementById('done-note');
+  var current = 0;
+  function show(id, scroll){
+    var i = ids.indexOf(id); if (i < 0) i = 0;
+    current = i;
+    document.querySelectorAll('video').forEach(function(v){ try { v.pause(); } catch(e){} });
+    lessons.forEach(function(s, k){ s.hidden = k !== i; });
+    links.forEach(function(a){ if (a.dataset.id === ids[i]) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+    renderMath(lessons[i]);
+    if (window.redrawGraphs) window.redrawGraphs();
+    prev.hidden = i === 0;
+    if (i > 0) prev.setAttribute('href', '#' + ids[i-1]);
+    var last = i === ids.length - 1;
+    next.setAttribute('href', last ? '#accueil' : '#' + ids[i+1]);
+    next.textContent = i === 0 ? 'Commencer le parcours →' : (last ? 'Valider et revenir au début' : "J'ai compris, étape suivante →");
+    doneNote.hidden = !done[ids[i]] || i === 0;
+    closeMenu();
+    if (scroll) window.scrollTo(0, 0);
+  }
+  next.addEventListener('click', function(){ if (current > 0){ done[ids[current]] = true; save(); refreshProgress(); } });
+  window.addEventListener('hashchange', function(){ show(location.hash.slice(1), true); });
+
+  // ----- chronomètres -----
+  document.querySelectorAll('.chrono').forEach(function(c){
+    var totalS = (+c.dataset.min || 15) * 60, left = totalS, timer = null;
+    var t = c.querySelector('.chrono-t'), b = c.querySelector('.c-start'), r = c.querySelector('.c-reset'), end = c.querySelector('.chrono-end');
+    function draw(){ var m = Math.floor(left / 60), s = left % 60; t.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s; }
+    function stop(){ clearInterval(timer); timer = null; b.textContent = left === totalS ? 'Démarrer' : 'Reprendre'; }
+    b.addEventListener('click', function(){
+      if (timer){ stop(); return; }
+      if (left === 0) return;
+      end.hidden = true; b.textContent = 'Pause';
+      timer = setInterval(function(){ left--; draw(); if (left <= 0){ left = 0; stop(); b.textContent = 'Terminé'; end.hidden = false; } }, 1000);
+    });
+    r.addEventListener('click', function(){ clearInterval(timer); timer = null; left = totalS; draw(); b.textContent = 'Démarrer'; end.hidden = true; });
+  });
+
+
+  // ----- évaluations de fin de partie -----
+  function typesetNow(el){
+    el.classList.remove('tex2jax_ignore');
+    if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([el]).catch(function(){});
+  }
+  document.querySelectorAll('.eval').forEach(function(ev){
+    var totalS = (+ev.dataset.min || 30) * 60, left = totalS, timer = null, key = 'parcours-cx-' + ev.dataset.id;
+    var go = ev.querySelector('.ev-go'), bar = ev.querySelector('.ev-bar'), t = ev.querySelector('.ev-t');
+    var pause = ev.querySelector('.ev-pause'), endB = ev.querySelector('.ev-end');
+    var suj = ev.querySelector('.ev-sujet'), cor = ev.querySelector('.ev-cor'), best = ev.querySelector('.ev-best');
+    var boxes = Array.prototype.slice.call(cor.querySelectorAll('input[type=checkbox]'));
+    var note = cor.querySelector('.ev-note strong'), avis = cor.querySelector('.ev-avis');
+    function showBest(){
+      var b = null; try { b = localStorage.getItem(key); } catch(e){}
+      if (b !== null){ best.hidden = false; best.textContent = 'Ta meilleure note à cette évaluation : ' + String(b).replace('.', ',') + ' / 20'; }
+    }
+    function draw(){ var m = Math.floor(left / 60), s = left % 60; t.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s; t.classList.toggle('low', left <= 300); }
+    function tick(){ left--; draw(); if (left <= 0){ left = 0; finish(true); } }
+    function run(){ timer = setInterval(tick, 1000); pause.textContent = 'Pause'; }
+    function stop(){ clearInterval(timer); timer = null; }
+    function finish(timeUp){
+      stop(); bar.hidden = true;
+      cor.hidden = false; typesetNow(cor);
+      avis.textContent = timeUp ? 'Temps écoulé. Pose ton stylo et corrige ta copie.' : '';
+      cor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    function score(){
+      var s = 0; boxes.forEach(function(b){ if (b.checked) s += parseFloat(b.dataset.p); });
+      s = Math.round(s * 4) / 4;
+      note.textContent = String(s).replace('.', ',');
+      var a = s >= 16 ? 'Très bien : la partie est acquise, passe à la suite.'
+        : s >= 12 ? 'Bien. Reprends les étapes où tu as perdu des points avant de continuer.'
+        : s >= 8 ? 'Pas encore suffisant. Refais les exercices des étapes concernées, puis recommence l\'évaluation dans quelques jours.'
+        : 'Reprends la partie depuis le début avant de recommencer l\'évaluation.';
+      avis.textContent = a;
+      try { var b = parseFloat(localStorage.getItem(key)); if (isNaN(b) || s > b) localStorage.setItem(key, String(s)); } catch(e){}
+    }
+    boxes.forEach(function(b){ b.addEventListener('change', score); });
+    go.addEventListener('click', function(){
+      left = totalS; draw();
+      go.textContent = 'Évaluation en cours';
+      go.disabled = true;
+      bar.hidden = false; suj.hidden = false; typesetNow(suj);
+      run();
+      bar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    pause.addEventListener('click', function(){ if (timer){ stop(); pause.textContent = 'Reprendre'; } else run(); });
+    endB.addEventListener('click', function(){ finish(false); });
+    cor.querySelector('.ev-again').addEventListener('click', function(){
+      boxes.forEach(function(b){ b.checked = false; });
+      note.textContent = '0'; avis.textContent = '';
+      cor.hidden = true; suj.hidden = true; bar.hidden = true;
+      go.disabled = false; go.textContent = 'Commencer l\'évaluation';
+      showBest();
+      ev.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    showBest();
+  });
+
+  // corrections : formules rendues à l'ouverture
+  document.querySelectorAll('.exo details').forEach(function(d){
+    d.addEventListener('toggle', function(){
+      if (!d.open || !d.classList.contains('tex2jax_ignore')) return;
+      d.classList.remove('tex2jax_ignore');
+      if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([d]).catch(function(){});
+    });
+  });
+
+  refreshProgress();
+  show(location.hash.slice(1) || 'accueil', false);
+  // si MathJax arrive après le premier affichage
+  var tries = 0, wait = setInterval(function(){
+    if (window.MathJax && MathJax.typesetPromise){ clearInterval(wait); renderMath(lessons[current]); }
+    else if (++tries > 100) clearInterval(wait);
+  }, 150);
+})();
+</script>
+
+</body>
+</html>
