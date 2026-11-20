@@ -27,10 +27,3 @@ Télécharger le dépôt (ou le zip), puis ouvrir `index.html` dans un navigateu
 ## Parcours Suites et fonctions (chapitre II)
 
 Page `suites-fonctions.html` : 19 étapes, exercices corrigés, 8 vidéos commentées, deux évaluations chronométrées.
-
-## Parcours Nombres complexes (Terminale S2)
-
-Page `nombres-complexes.html` : parcours Mathnexus Education pour la Terminale S2, sans les transformations du plan.
-Parties 1 (forme algébrique) et 2 (équations) en ligne : 7 étapes, graphiques interactifs du plan complexe,
-exercices corrigés tirés des sujets du bac sénégalais, une évaluation chronométrée notée sur 20 à la fin de chaque partie.
-Les parties 3 à 6 (module et argument, racines n-ièmes, géométrie, suites) et les vidéos suivront.
